@@ -1,7 +1,4 @@
-import os
-
 if __name__ == '__main__':
-    os.chdir('/')
     from src.data.processing.preparing import DataPreparer
     from src.data.processing.datasets import HOMRDataset
     from src.data.processing.constants import *
