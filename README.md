@@ -8,11 +8,11 @@ First, install the requirements under **Python 3.10.9** as following:
 ```
 $ pip install -r settings/requirements.txt
 ```
-To perform model comparaisons experiments, run 
+To perform model comparaisons experiments, run:
 ```
 $ python model_selection.py
 ```
-To replicate the final results on the eligible end-of-life care patients, run 
+To replicate the final results on eligible end-of-life care patients, run:
 ```
 $ python final_validation.py
 ```
@@ -23,8 +23,8 @@ $ python feature_importance.py
 ## Project Tree
 ```
 ├── csvs                         <- CSV files of the dataset used in the study
-├── hps                          <- Python file to store range of hyperparameters values
-├── settings                     <- Files to set the project setup
+├── hps                          <- Python file to store the range of hyperparameters values
+├── settings                     <- Files for project setup
 ├── src                          <- All project modules
 │   ├── data
 |   │   ├── processing
@@ -34,9 +34,9 @@ $ python feature_importance.py
 |   │   │   └── sampling.py           <- Sampling of the dataset
 |   │   │   └── transforms.py         <- Data preprocessing
 │   ├── evaluation
-│   │   ├── early_stopping.py     <- Module to perform early stopping on validation data
+│   │   ├── early_stopping.py     <- Module for early stopping on validation data
 │   │   └── evaluating.py         <- Skeleton of each experiment process
-│   │   └── tuning.py             <- Hyper-parameters optimizations using different optimizers
+│   │   └── tuning.py             <- Hyper-parameters optimizations 
 │   └── utils                     
 │   │   └── delong.py             <- Fast implementation of DeLong test
 │   │   └── hyperparameters.py    <- Defines hyperparameters types
