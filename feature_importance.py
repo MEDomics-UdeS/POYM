@@ -2,7 +2,7 @@ import os
 
 from tqdm import tqdm
 
-os.chdir('../')
+os.chdir('/')
 
 if __name__ == '__main__':
     from src.models.lstm import HOMRBinaryLSTMC
