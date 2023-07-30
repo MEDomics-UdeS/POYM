@@ -30,6 +30,6 @@ tests/*
 checkpoints/*
 stats.ipynb
 experiments/*
-!experiments/feature_importance.py
-!experiments/model_selection.py
+!feature_importance.py
+!model_selection.py
 !.gitkeep
