@@ -43,7 +43,8 @@ class HOMRDataset(Dataset):
                  encoding: Optional[str] = None,
                  to_tensor: bool = False,
                  norm_col: Optional[List[str]] = None,
-                 temporal: bool = False
+                 temporal: bool = False,
+                 super_learning: bool = False
                  ):
         """
         Sets protected and public attributes of our custom dataset class
@@ -55,6 +56,9 @@ class HOMRDataset(Dataset):
             cont_cols: list of column names associated with continuous data
             cat_cols: list of column names associated with categorical data
             to_tensor: true if we want the features and targets in tensors, false for numpy arrays
+            norm_col: columns to normalize, if none, normalize all continuous columns
+            temporal: specifies if the dataset will be used for a temporal analysis
+            super_learning: specifies if the dataset will be used for super learning purposes
 
         """
         # Validations of inputs
@@ -88,6 +92,7 @@ class HOMRDataset(Dataset):
         self._to_tensor = to_tensor
         self._encoding, self._encodings = encoding, {}
         self._temporal_analysis = temporal
+        self._super_learner = super_learning
 
         # Initialize train, valid and test masks
         self._train_mask, self._valid_mask, self._test_mask = [], None, []
@@ -322,9 +327,9 @@ class HOMRDataset(Dataset):
             return self._x_cont
 
     def update_masks(self,
-                     train_mask: Union[List[int], List[List[int]]],
-                     test_mask: Union[List[int], List[List[int]]],
-                     valid_mask: Optional[Union[List[int], List[List[int]]]] = None,
+                     train_mask: Union[List[int], List[List[int]], Dict[int, List[List[int]]]],
+                     test_mask: Union[List[int], List[List[int]], Dict[int, List[List[int]]]],
+                     valid_mask: Optional[Union[List[int], List[List[int]]], Dict[int, List[List[int]]]] = None,
                      graph_construction: bool = True) -> None:
         """
         Updates the train, valid and test masks
@@ -343,14 +348,15 @@ class HOMRDataset(Dataset):
         self._train_mask, self._test_mask = train_mask, test_mask
         self._valid_mask = valid_mask if valid_mask is not None else []
 
-        # Compute the current values of modes, mu, std
-        if self._norm_col is not None:
-            self._modes, self._mu, self._std = self._current_train_stats(cont_cols=self._norm_col)
-        else:
-            self._modes, self._mu, self._std = self._current_train_stats()
+        if not self._super_learner:
+            # Compute the current values of modes, mu, std
+            if self._norm_col is not None:
+                self._modes, self._mu, self._std = self._current_train_stats(cont_cols=self._norm_col)
+            else:
+                self._modes, self._mu, self._std = self._current_train_stats()
 
-        # Normalize continuous data according to the current training set statistics
-        self._x_cont = self.numerical_setter(self._mu, self._std)
+            # Normalize continuous data according to the current training set statistics
+            self._x_cont = self.numerical_setter(self._mu, self._std)
 
     def numerical_setter(self,
                          mu: float,
