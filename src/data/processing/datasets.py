@@ -234,7 +234,7 @@ class HOMRDataset(Dataset):
         return self._temporal_analysis
 
     @staticmethod
-    def flatten_indexes(mask: List[List[int]]) -> List[int]:
+    def flatten_indexes(mask: List[List[int]]) -> Tuple[List[int], List[int]]:
         """
         Flatten the mask and get the relative index of last index for each inner list
         """
