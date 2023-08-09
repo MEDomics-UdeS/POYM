@@ -156,15 +156,21 @@ class Evaluator:
             # We update the fixed parameters according to the subset
             self._fixed_params = self._update_fixed_params(subset, k)
 
-            # We record the data count
-            for name, mask in [("train_set", train_mask), ("valid_set", valid_mask), ("test_set", test_mask)]:
-                mask_length = len(mask) if mask is not None else 0
-                recorder.record_data_info(name, mask_length)
+            # Combine all the masks
+            masks_names = {
+                "train_set": train_mask,
+                "valid_set": valid_mask,
+                "test_set": test_mask,
+                **{"test_" + name + "_set": mask for name, mask in additional_test_masks.items()}
+            }
 
-            # Record the data count for the additional test masks if there is any
-            for name, mask in additional_test_masks.items():
-                mask_length = len(mask) if mask is not None else 0
-                recorder.record_data_info('test_' + name + '_set', mask_length)
+            # Record the data count
+            for name, mask in masks_names.items():
+                if mask is None:
+                    mask_length = 0
+                else:
+                    mask_length = sum(len(idx) for idx in mask.values()) if isinstance(mask, dict) else len(mask)
+                recorder.record_data_info(name, mask_length)
 
             # We update the tuner to perform the hyperparameters optimization
             if self._hp_tuning:
@@ -225,7 +231,6 @@ class Evaluator:
         except:
             pass
 
-
     def _create_objective(self,
                           masks: Dict[int, Dict[str, List[int]]],
                           subset: HOMRDataset,
@@ -271,12 +276,26 @@ class Evaluator:
 
         # We find the optimal threshold and save it
         pred = model.predict_proba(subset, subset.train_mask)
-        _, y_train, _ = subset[subset.train_mask]
+
+        # Get the train indexes
+        indexes = (
+            [idx for idx_split in subset.train_mask.values() for idx in idx_split]
+            if isinstance(subset.train_mask, dict)
+            else subset.train_mask
+        )
+
+        # Get the training targets
+        _, y_train, _ = subset[indexes]
+
         if subset.temporal_analysis:
             # Put the targets in the right format
-            y_train = torch.cat(y_train)  # .to(model._model._device)
+            y_train = torch.cat(y_train)
 
-        model.find_optimal_threshold(y_train, pred)
+        # Get the indexes of each last element of a sequence
+        relative_indexes, _ = subset.flatten_indexes(indexes)
+        # Get the optimal threshold on these data
+        model.find_optimal_threshold(y_train[relative_indexes], pred[relative_indexes])
+
         recorder.record_data_info('thresh', str(model.thresh))
 
         m = [tuple(zip(additional_test_masks.values(), additional_test_masks.keys()))[i]
@@ -290,23 +309,22 @@ class Evaluator:
             if len(mask) > 0:
                 pred = model.predict_proba(subset, mask)
 
+                # Get the indexes
+                mask = (
+                    [idx for idx_split in subset.train_mask.values() for idx in idx_split]
+                    if isinstance(subset.train_mask, dict)
+                    else subset.train_mask
+                )
+
                 # We extract targets
                 _, y, _ = subset[mask]
 
                 if subset.temporal_analysis:
-                    # Put the targets in the right shape
-                    y = torch.cat(y)
+                    # Get relative indexes
+                    relative_indexes, flatten_mask = subset.flatten_indexes(mask)
 
-                    # Flatten mask
-                    flatten_mask = []
-                    relative_indexes = []
-                    initial_index = 0
-                    for i, indexes in enumerate(mask):
-                        flatten_mask.append(indexes[-1])
-                        relative_indexes.append(initial_index + len(indexes) - 1)
-                        initial_index += len(indexes)
-
-                    y = y[relative_indexes]
+                    # Get last element of each sequence
+                    y = torch.cat(y)[relative_indexes]
                     pred = pred[relative_indexes]
                     mask = flatten_mask
 
@@ -333,8 +351,6 @@ class Evaluator:
                 # We save the predictions
                 recorder.record_predictions(probabilities=proba, predictions=pred, ids=ids, targets=y,
                                             mask_type=mask_type)
-
-        return None
 
     def _load_predictions(self,
                           split_number: int,
