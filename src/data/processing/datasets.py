@@ -184,15 +184,15 @@ class HOMRDataset(Dataset):
         return self._target
 
     @property
-    def test_mask(self) -> List[int]:
+    def test_mask(self) -> Union[List[int], List[List[int]], Dict[int, List[List[int]]]]:
         return self._test_mask
 
     @property
-    def train_mask(self) -> List[int]:
+    def train_mask(self) -> Union[List[int], List[List[int]], Dict[int, List[List[int]]]]:
         return self._train_mask
 
     @property
-    def valid_mask(self) -> Optional[List[int]]:
+    def valid_mask(self) -> Optional[Union[List[int], List[List[int]], Dict[int, List[List[int]]]]]:
         return self._valid_mask
 
     @property
@@ -232,6 +232,22 @@ class HOMRDataset(Dataset):
     @property
     def temporal_analysis(self) -> bool:
         return self._temporal_analysis
+
+    @staticmethod
+    def flatten_indexes(mask: List[List[int]]) -> List[int]:
+        """
+        Flatten the mask and get the relative index of last index for each inner list
+        """
+        relative_indexes = []
+        initial_index = 0
+        flatten_mask = []
+        for i, indexes in enumerate(mask):
+            flatten_mask.append(indexes[-1]) if indexes is isinstance(indexes, list) else indexes
+            indexes = [indexes] if indexes is not isinstance(indexes, list) else indexes
+            relative_indexes.append(initial_index + len(indexes) - 1)
+            initial_index += len(indexes)
+
+        return relative_indexes, flatten_mask
 
     def _get_categorical_set(self) -> Optional[Union[array, tensor]]:
         """
@@ -329,7 +345,7 @@ class HOMRDataset(Dataset):
     def update_masks(self,
                      train_mask: Union[List[int], List[List[int]], Dict[int, List[List[int]]]],
                      test_mask: Union[List[int], List[List[int]], Dict[int, List[List[int]]]],
-                     valid_mask: Optional[Union[List[int], List[List[int]]], Dict[int, List[List[int]]]] = None,
+                     valid_mask: Optional[Union[List[int], List[List[int]], Dict[int, List[List[int]]]]] = None,
                      graph_construction: bool = True) -> None:
         """
         Updates the train, valid and test masks
