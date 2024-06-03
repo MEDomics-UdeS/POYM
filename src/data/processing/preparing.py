@@ -24,11 +24,11 @@ class DataPreparer:
                  task: str = constants.OYM,
                  ):
         """
-                Saves private attributes
+        Saves private attributes
 
-                Args:
-                    train_file : path to the csv of the training cohort with visits between 01-07-2011 and 30-06-2016
-                    test_fie : path to the csv of the testing cohort with visits between 01-07-2017 and 30-06-2018
+        Args:
+            train_file : path to the csv of the training cohort with visits between 01-07-2011 and 30-06-2017
+            test_fie : path to the csv of the testing cohort with visits between 01-07-2017 and 30-06-2021
         """
 
         # Internal private fixed attributes
@@ -37,8 +37,7 @@ class DataPreparer:
         self.__training_cohort = pd.read_csv(train_file)
         self.__testing_cohort = pd.read_csv(test_fie) if test_fie is not None else None
 
-        # select the only 244 predictors used in HOMR, the visit_id and the patient_id
-        # for each cohort and the target variable
+        # select the predictors, the visit_id and the patient_id for each cohort and the target column
         self.__training_cohort = self.select_variables(self.__training_cohort)
 
         # add ID column to the training set
@@ -116,9 +115,9 @@ class DataPreparer:
                 fold : boolean to specify if we want to select variables of the training set or the testing set
 
         """
-        if not (all(item in df.columns for item in
-                    [constants.PATIENT] + [constants.VISIT] + constants.PREDICTORS + [self.task])):
-            raise Exception("Dataframe has missing necessary columns")
+        for item in [constants.PATIENT] + [constants.VISIT] + constants.PREDICTORS + [self.task]:
+            if item not in df.columns:
+                raise Exception(f"Dataframe has missing necessary columns: {item}")
 
         if fold:
             if constants.FOLD not in df.columns:
@@ -130,38 +129,18 @@ class DataPreparer:
 
     @staticmethod
     def add_ids(df: pd.DataFrame,
-                begining=0):
+                shift: int = 0):
         """
-            Add a column IDS to the dataframe
-
-                Args:
-                      df : pandas dataframe
-        """
-        patients = df[constants.PATIENT].unique()
-        k = pd.DataFrame({constants.IDS: list(range(begining, len(patients) + begining)),
-                          constants.PATIENT: patients})
-        df = pd.merge(df, k, on=constants.PATIENT)
-        return df.reset_index(drop=True)
-
-    @staticmethod
-    def add_column(df: pd.DataFrame,
-                   file: str):
-        """
-        Add a prediction column to the dataframe, datas to add are in a json file
+        Add a column IDS to the dataframe
 
         Args:
             df : pandas dataframe
-            file: path to the file
+            shift: start number from which identifiers are generated
         """
-
-        data = json.load(open(file))
-
-        predictions = []
-        for _, prediction in data.items():
-            predictions.append(float(prediction))
-
-        df['pred'] = predictions
-
+        patients = df[constants.PATIENT].unique()
+        k = pd.DataFrame({constants.IDS: list(range(shift, len(patients) + shift)),
+                          constants.PATIENT: patients})
+        df = pd.merge(df, k, on=constants.PATIENT)
         return df.reset_index(drop=True)
 
     @staticmethod
@@ -169,16 +148,15 @@ class DataPreparer:
             df: pd.DataFrame,
             column: str) -> pd.DataFrame:
         """
-        Renames values of a specific column and raises exception if the given column doesn't have
-        columns to rename
+        Renames values of a specific column
 
-            Args:
-                df : pandas dataframe
-                column : name of the column with values to rename
+        Args:
+            df : pandas dataframe
+            column : name of the column with values to rename
         """
         if column not in constants.COL_VALUES_RENAMED:
             raise ValueError(
-                "Column with values to rename must be in : gender, living_status, admission_group, service_group")
+                f"Column with values to rename must be in : {constants.COL_VALUES_RENAMED}")
 
         else:
             if column == "gender":
