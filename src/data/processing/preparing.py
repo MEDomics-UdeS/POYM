@@ -1,7 +1,7 @@
 """
 Filename: preparing.py
 
-Description: Defines the DataPreparer used to prepare the different cohorts of the project for cleaning.
+Description: Defines the DataPreparer used to prepare the different cohorts of the project
 
 """
 import numpy as np
