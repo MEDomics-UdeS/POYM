@@ -79,9 +79,9 @@ class HOMRDataset(Dataset):
         else:
             self._cont_cols = cont_cols
         self._cont_idx = []
-        self._binary_col = [col for col in cat_cols if (len(np.unique(dataset[col])) == 2) &
+        self._binary_col = [col for col in cat_cols if (len(np.unique(dataset[col])) <= 2) &
                             (0 in np.unique(dataset[col]))
-                            & (1 in np.unique(dataset[col]))] if cat_cols is not None else None
+                            | (1 in np.unique(dataset[col]))] if cat_cols is not None else None
         self._norm_col = norm_col
         self.__id_column = ids
         self._ids = list(dataset[ids].values)
@@ -242,8 +242,7 @@ class HOMRDataset(Dataset):
         initial_index = 0
         flatten_mask = []
         for i, indexes in enumerate(mask):
-            flatten_mask.append(indexes[-1]) if indexes is isinstance(indexes, list) else indexes
-            indexes = [indexes] if indexes is not isinstance(indexes, list) else indexes
+            flatten_mask.append(indexes[-1])
             relative_indexes.append(initial_index + len(indexes) - 1)
             initial_index += len(indexes)
 
@@ -529,8 +528,8 @@ class HOMRDataset(Dataset):
 
         for id_ in ids:
             indexes = self.original_data.index[self.original_data[self.__id_column] == id_].tolist()
-            id_obs = self.original_data.nb_visits[self.original_data[self.__id_column] == id_].tolist()
-            map_ids[id_] = dict(zip(id_obs, indexes))
+            visit_number = self.original_data.nb_visits[self.original_data[self.__id_column] == id_].tolist()
+            map_ids[id_] = dict(zip(visit_number, indexes))
 
         return map_ids
 
@@ -576,6 +575,7 @@ class LightHOMRDataset(Dataset):
             x : (N,D) tensor or array with D-dimensional samples
             y : (N,) tensor or array with classification labels
             idx : (N,) tensor or array with idx of samples according to the whole dataset
+            temporal_analysis : boolean to indicate if samples are organized in temporal sequences
 
         """
         # Sets the public attributes
