@@ -77,4 +77,4 @@ COL_VALUES_RENAMED = [
 ]
 
 # Maximum number of visits to consider
-MAX_VISIT = 10
+MAX_VISIT = 5
