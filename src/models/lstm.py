@@ -6,7 +6,7 @@ Description: This file is used to define the classification
 
 """
 
-from typing import Callable, Dict, List, Optional
+from typing import List, Optional
 
 from src.models.abstract_models.lstm_base_models import LSTMBinaryClassifier
 from src.models.wrappers.torch_wrappers import TorchBinaryClassifierWrapper
@@ -16,7 +16,7 @@ from src.utils.metric_scores import BinaryClassificationMetric, AUC
 
 class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
     """
-    Multilayer perceptron classification model wrapper for the HOMR framework
+    LSTM classification model wrapper for the HOMR framework
     """
 
     def __init__(self,
@@ -41,7 +41,7 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
                  bidirectional: bool = True,
                  weight: float = 0.87):
         """
-        Builds a binary classification MLP and sets the protected attributes using parent's constructor
+        Builds a binary classification LSTM and sets the protected attributes using parent's constructor
 
         Args:
             n_layer: number of hidden layer
@@ -51,8 +51,6 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
             alpha: L1 penalty coefficient
             beta: L2 penalty coefficient
             lr: learning rate
-            rho: if >=0 will be used as neighborhood size in Sharpness-Aware Minimization optimizer,
-                 otherwise, Adam optimizer will be used
             batch_size: size of the batches in the evaluating loader
             valid_batch_size: size of the batches in the valid loader (None = one single batch)
             max_epochs: maximum number of epochs for evaluating
@@ -109,7 +107,7 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
 
 class RNNHP:
     """
-    MLP's hyperparameters
+    RNN's hyperparameters
     """
     ALPHA = NumericalContinuousHP("alpha")
     BATCH_SIZE = NumericalIntHP("batch_size")
