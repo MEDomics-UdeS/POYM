@@ -9,27 +9,28 @@ Description: This file is used to define the Evaluator class in charge
 
 Date of last modification : 2021/10/29
 """
+import pickle
+import random
 from copy import deepcopy
 from json import load
 from os import makedirs, path
 from time import strftime
 from typing import Any, Callable, Dict, List, Optional, Union
-import torch
+
 import pandas as pd
-import ray
+import torch
 from numpy.random import seed as np_seed
-import random
 from torch import is_tensor, from_numpy, manual_seed
-import pickle
+
 from settings.paths import Paths
 from src.data.processing import constants
 from src.data.processing.datasets import HOMRDataset
 from src.data.processing.sampling import MaskType
-from src.models.abstract_models.base_models import BinaryClassifier
-from src.recording.constants import PREDICTION, RECORDS_FILE, TEST_RESULTS, TRAIN_RESULTS, VALID_RESULTS
-from src.recording.recording import Recorder, compare_prediction_recordings, \
-    get_evaluation_recap, plot_hps_importance_chart
 from src.evaluating.tuning import Objective, Tuner
+from src.models.abstract_models.base_models import BinaryClassifier
+from src.models.lstm import HOMRBinaryLSTMC
+from src.recording.constants import PREDICTION, RECORDS_FILE, TEST_RESULTS, TRAIN_RESULTS, VALID_RESULTS
+from src.recording.recording import Recorder, get_evaluation_recap, plot_hps_importance_chart
 from src.utils.metric_scores import Metric
 
 
@@ -52,9 +53,9 @@ class Evaluator:
                  fixed_params_update_function: Optional[Callable] = None,
                  save_hps_importance: Optional[bool] = True,
                  save_parallel_coordinates: Optional[bool] = True,
-                 existing_eval: bool = False,
                  save_optimization_history: Optional[bool] = True,
-                 train: str = None):
+                 pretrained_model: str = None,
+                 experiments_records: str = Paths.EXPERIMENTS_RECORDS):
         """
         Set protected and public attributes
 
@@ -75,14 +76,16 @@ class Evaluator:
             save_hps_importance: true if we want to plot the hyperparameters importance graph after tuning
             save_parallel_coordinates: true if we want to plot the parallel coordinates graph after tuning
             save_optimization_history: true if we want to plot the optimization history graph after tuning
+            pretrained_model: path to directory where to get pretrained models for each split of the experiment
+            experiments_records: path to directory where to save experiments
         """
 
         # We look if a file with the same evaluation name exists
         if evaluation_name is not None:
-            if path.exists(path.join(Paths.EXPERIMENTS_RECORDS, evaluation_name)) & (not existing_eval):
+            if path.exists(path.join(experiments_records, evaluation_name)):
                 raise ValueError("evaluation with this name already exists")
         else:
-            makedirs(Paths.EXPERIMENTS_RECORDS, exist_ok=True)
+            makedirs(experiments_records, exist_ok=True)
             evaluation_name = f"{strftime('%Y%m%d-%H%M%S')}"
 
         # We set protected attributes
@@ -97,14 +100,15 @@ class Evaluator:
                             save_hps_importance=save_hps_importance,
                             save_parallel_coordinates=save_parallel_coordinates,
                             save_optimization_history=save_optimization_history,
-                            path=Paths.EXPERIMENTS_RECORDS)
+                            path=experiments_records)
 
         # We set the public attributes
         self.evaluation_name = evaluation_name
         self.model_constructor = model_constructor
         self.evaluation_metrics = evaluation_metrics
         self.seed = seed
-        self.train = train
+        self.pretrained_model = pretrained_model
+        self.experiments_records = experiments_records
         # We set the fixed params update method
         if fixed_params_update_function is not None:
             self._update_fixed_params = fixed_params_update_function
@@ -144,11 +148,11 @@ class Evaluator:
             # We create the Recorder object to save the result of this experience
             recorder = Recorder(evaluation_name=self.evaluation_name,
                                 index=k,
-                                recordings_path=Paths.EXPERIMENTS_RECORDS,
+                                recordings_path=self.experiments_records,
                                 masks_types=list(v.keys()))
 
             # We save the saving path
-            saving_path = path.join(Paths.EXPERIMENTS_RECORDS, self.evaluation_name, f"Split_{k}")
+            saving_path = path.join(self.experiments_records, self.evaluation_name, f"Split_{k}")
 
             # We proceed to feature selection
             subset = deepcopy(self._dataset)
@@ -202,16 +206,22 @@ class Evaluator:
             print(f"\nFinal model training - K = {k}\n")
             if self._hp_tuning:
                 subset.update_masks(train_mask=train_mask, valid_mask=valid_mask, test_mask=test_mask)
-            if self.train is None:
+
+            if self.pretrained_model is None:
                 model.fit(dataset=subset)
                 # We save plots associated to evaluating
                 if hasattr(model, 'plot_evaluations') and valid_mask is not None:
                     model.plot_evaluations(save_path=saving_path)
 
-                # We save the trained model
-                model.save_model(path=saving_path)
             else:
-                model._model = torch.load(self.train)
+                if isinstance(model, HOMRBinaryLSTMC):
+                    model._model = torch.load(self.pretrained_model.format(str(k)))
+                else:
+                    with open(self.pretrained_model.format(str(k)), "rb") as input_file:
+                        model._model = pickle.load(input_file)
+
+            # We save the trained model
+            model.save_model(path=saving_path)
 
             # We get the predictions and save the evaluation metric scores
             self._record_scores_and_pred(model, recorder, subset, additional_test_masks)
@@ -221,15 +231,12 @@ class Evaluator:
 
         # We save the evaluation recap
         get_evaluation_recap(evaluation_name=self.evaluation_name,
-                             recordings_path=Paths.EXPERIMENTS_RECORDS,
+                             recordings_path=self.experiments_records,
                              masks_types=list(v.keys()))
 
         # We save the hyperparameters importance chart
-        try:
-            plot_hps_importance_chart(evaluation_name=self.evaluation_name,
-                                      recordings_path=Paths.EXPERIMENTS_RECORDS)
-        except:
-            pass
+        plot_hps_importance_chart(evaluation_name=self.evaluation_name,
+                                  recordings_path=self.experiments_records)
 
     def _create_objective(self,
                           masks: Dict[int, Dict[str, List[int]]],
@@ -290,11 +297,12 @@ class Evaluator:
         if subset.temporal_analysis:
             # Put the targets in the right format
             y_train = torch.cat(y_train)
-
-        # Get the indexes of each last element of a sequence
-        relative_indexes, _ = subset.flatten_indexes(indexes)
-        # Get the optimal threshold on these data
-        model.find_optimal_threshold(y_train[relative_indexes], pred[relative_indexes])
+            # Get the indexes of each last element of a sequence
+            relative_indexes, _ = subset.flatten_indexes(indexes)
+            # Get the optimal threshold on these data
+            if len(relative_indexes) != len(pred):  # predictions are not on all the indexes but last ones only
+                pred = pred[relative_indexes]  # case when we do temporal analysis but not with LSTM (ex. Super Learner)
+            model.find_optimal_threshold(y_train[relative_indexes], pred)
 
         recorder.record_data_info('thresh', str(model.thresh))
 
@@ -311,9 +319,9 @@ class Evaluator:
 
                 # Get the indexes
                 mask = (
-                    [idx for idx_split in subset.train_mask.values() for idx in idx_split]
-                    if isinstance(subset.train_mask, dict)
-                    else subset.train_mask
+                    [idx for idx_split in mask.values() for idx in idx_split]
+                    if isinstance(mask, dict)
+                    else mask
                 )
 
                 # We extract targets
@@ -325,7 +333,8 @@ class Evaluator:
 
                     # Get last element of each sequence
                     y = torch.cat(y)[relative_indexes]
-                    pred = pred[relative_indexes]
+                    if len(relative_indexes) != len(pred):
+                        pred = pred[relative_indexes]
                     mask = flatten_mask
 
                 # We extract ids for recording
@@ -344,7 +353,7 @@ class Evaluator:
                 if not is_tensor(pred):
                     pred = from_numpy(pred)
 
-                # We get the final predictions from the soft predictions
+                # We get the final predictions from the probabilities
                 proba = pred
                 pred = (pred >= threshold).long()
 
