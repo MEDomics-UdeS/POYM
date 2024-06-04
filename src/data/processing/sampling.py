@@ -1,25 +1,24 @@
 """
 Filename: sampling.py
 
-Description: Defines the Bootstrapper used to create bootstraps for each tree during Random Forest training
-            and the _10FoldsCrossValidationSampler used to perform a 10 folds cross-validation
+Description: Defines the classes used to sample the dataset for analyses
 
 """
-from typing import Callable, Dict, List, Optional, Union, Tuple
+from collections import OrderedDict
+from random import shuffle
+from typing import Dict, List, Optional, Union, Tuple
 
 import numpy as np
 import pandas as pd
 from numpy import array
 from numpy.random import seed
 from sklearn.model_selection import KFold
-from sklearn.model_selection import StratifiedShuffleSplit, train_test_split
-from torch import tensor
-from tqdm import tqdm
-from src.data.processing.datasets import HOMRDataset
-from src.data.processing import constants
+from sklearn.model_selection import train_test_split
 from torch.utils.data import Sampler
-from random import shuffle
-from collections import OrderedDict
+from tqdm import tqdm
+
+from src.data.processing import constants
+from src.data.processing.datasets import HOMRDataset
 
 
 class MaskType:
@@ -35,7 +34,12 @@ class MaskType:
         return iter([self.TRAIN, self.VALID, self.TEST])
 
 
-class SimpleSampler:
+class OneShotSampler:
+    """
+    Object used in order to retrieve one single list of indexes to use as train and test masks in the final evaluation,
+    training and testing sets are priorly given
+    """
+
     def __init__(self,
                  dataset: HOMRDataset,
                  random_state: int = 101,
@@ -45,10 +49,11 @@ class SimpleSampler:
         """
         Sets protected attributes of the sampler
 
-            Args:
-                dataset: HOMR dataset
-                n_inner: number of folds in inner splits
-                random_state: random state to reproduce results
+        Args:
+            dataset: HOMR dataset
+            random_state: random state to reproduce results
+            valid_size: percentage of training data to be used for validation
+            n_inner: number of folds in inner splits
         """
 
         # Sets protected attributes
@@ -60,26 +65,22 @@ class SimpleSampler:
     def __call__(self,
                  learning_ids,
                  test_ids,
-                 sampling_strategy: int = 0,
-                 cumulate_samples: bool = False,
-                 temporal_sampling: bool = False,
+                 sampling_strategy: int = None,
                  multiple_test_masks: bool = True,
-                 experiment: Optional[str] = None,
+                 serialize: bool = False,
                  ) -> Dict:
         """
         Returns lists of indexes to use as train and test masks for outer and inner splits
 
         Args:
-            sampling_strategy:
-                            - if 0 cumulative_samples and temporal_sampling must be at false, split ids to train, test
-                            and valid then consider all occurrences of ids in each set.
+            learning_ids: list of ids of patients from the learning set
+            test_ids: list of ids of patients from the holdout set
+            sampling_strategy: samples to consider in the training and validation sets
                             - if i > 0, the ith id's occurrence to consider (ith patient's visit)
                             - if -1 consider the last occurrence (visit).
-            cumulate_samples: either we consider visits before the ith visit in training and validation sets
-            temporal_sampling: if true cumulative_samples must be at false. Either we cumulate occurrences in a list for
-                            recurrent analysis, example:
-                            [[id_0_occ_0, id_0_occ_1,.., id_0_occ_i], .. , [id_n_occ_0, id_n_occ_1,.., id_n_occ_i]]
-
+                            - if None, consider all patient's visits' independently
+            multiple_test_masks: boolean to specify if we build multiple test masks in the outer loop.
+            serialize: boolean to specify whether to organize the list of ids in temporal sequences for RNN inputs
         Example:
             {0: {'train': [..], 'test': [..]}, 'inner': [..]}
 
@@ -100,45 +101,47 @@ class SimpleSampler:
             valid_ids = None
 
         # Get the corresponding indexes in the dataset of the selected ids according to the sampling strategy
-        masks[0] = KFoldsSampler.sample_idx_with_strategy(multiple_test_masks,
-                                                          sampling_strategy,
-                                                          cumulate_samples,
-                                                          temporal_sampling,
-                                                          map_ids,
-                                                          (train_ids, valid_ids, test_ids))
-        masks[0][MaskType.INNER] = {}
+        list_test_ids = test_ids if isinstance(test_ids[0], list) else [test_ids]
+        for i in range(len(list_test_ids)):
+            test_ids = list_test_ids[i]
+            masks[i] = KFoldsSampler.sample_idx_with_strategy(multiple_test_masks,
+                                                              map_ids,
+                                                              (train_ids, valid_ids, test_ids),
+                                                              sampling_strategy,
+                                                              serialize
+                                                              )
+            masks[i][MaskType.INNER] = {}
 
-        if self._inner > 0:
-            inner_k_folds = KFold(n_splits=self._inner, random_state=self._random_state, shuffle=True)
+            if self._inner > 0:
+                inner_k_folds = KFold(n_splits=self._inner, random_state=self._random_state, shuffle=True)
 
-            inner_splits = inner_k_folds.split(train_ids)
-            with tqdm(total=self._inner) as bar:
-                for j, (inner_remaining_idx, inner_test_idx) in enumerate(inner_splits):
-                    # Get the ids selected in each set (not the indexes)
-                    inner_test_ids = np.array(train_ids)[inner_test_idx]
-                    inner_learning_ids = np.array(train_ids)[inner_remaining_idx]
+                inner_splits = inner_k_folds.split(train_ids)
+                with tqdm(total=self._inner) as bar:
+                    for j, (inner_remaining_idx, inner_test_idx) in enumerate(inner_splits):
+                        # Get the ids selected in each set (not the indexes)
+                        inner_test_ids = np.array(train_ids)[inner_test_idx]
+                        inner_learning_ids = np.array(train_ids)[inner_remaining_idx]
 
-                    # Get the training and validation masks
-                    if self._valid_size > 0.:
-                        inner_train_ids, inner_valid_ids = train_test_split(inner_learning_ids,
-                                                                            test_size=self._valid_size,
-                                                                            random_state=101,
-                                                                            shuffle=True)
-                    else:
-                        inner_train_ids = inner_learning_ids
-                        inner_valid_ids = None
+                        # Get the training and validation masks
+                        if self._valid_size > 0.:
+                            inner_train_ids, inner_valid_ids = train_test_split(inner_learning_ids,
+                                                                                test_size=self._valid_size,
+                                                                                random_state=101,
+                                                                                shuffle=True)
+                        else:
+                            inner_train_ids = inner_learning_ids
+                            inner_valid_ids = None
 
-                    # Get the corresponding indexes in the dataset of the selected ids according to the sampling
-                    # strategy
-                    masks[0][MaskType.INNER][j] = KFoldsSampler.sample_idx_with_strategy(multiple_test_masks,
-                                                                                         sampling_strategy,
-                                                                                         cumulate_samples,
-                                                                                         temporal_sampling,
-                                                                                         map_ids,
-                                                                                         (inner_train_ids,
-                                                                                          inner_valid_ids,
-                                                                                          inner_test_ids))
-                    bar.update()
+                        # Get the corresponding indexes in the dataset of the selected ids according to the sampling
+                        # strategy
+                        masks[i][MaskType.INNER][j] = KFoldsSampler.sample_idx_with_strategy(False,
+                                                                                             map_ids,
+                                                                                             (inner_train_ids,
+                                                                                              inner_valid_ids,
+                                                                                              inner_test_ids),
+                                                                                             sampling_strategy,
+                                                                                             serialize)
+                        bar.update()
 
         return masks
 
@@ -166,6 +169,7 @@ class KFoldsSampler:
                 k: number of folds in outer splits
                 inner_k : number of folds in inner splits
                 random_state: random state to reproduce results
+                valid_size: percentage of training data to be used for validation
                 folds: (N,) array with the same size of the dataset containing the fold of each sample
         """
         # Validation of input
@@ -185,25 +189,21 @@ class KFoldsSampler:
         self._valid_size = valid_size
 
     def __call__(self,
-                 sampling_strategy: int = 0,
-                 cumulate_samples: bool = False,
-                 temporal_sampling: bool = False,
+                 sampling_strategy: int = None,
                  multiple_test_masks: bool = True,
-                 experiment: Optional[str] = None
+                 experiment: Optional[str] = None,
+                 serialize: bool = False
                  ) -> Dict:
         """
         Returns lists of indexes to use as train and test masks for outer and inner folds cross validation splits
 
         Args:
-            sampling_strategy:
-                            - if 0 cumulative_samples and temporal_sampling must be at false, split ids to train, test
-                            and valid then consider all occurrences of ids in each set.
+            sampling_strategy: samples to consider in the training and validation sets
                             - if i > 0, the ith id's occurrence to consider (ith patient's visit)
                             - if -1 consider the last occurrence (visit).
-            cumulate_samples: either we consider visits before the ith visit in training and validation sets
-            temporal_sampling: if true cumulative_samples must be at false. Either we cumulate occurrences in a list for
-                            recurrent analysis, example:
-                            [[id_0_occ_0, id_0_occ_1,.., id_0_occ_i], .. , [id_n_occ_0, id_n_occ_1,.., id_n_occ_i]]
+                            - if None, consider all patient's visits' independently
+            multiple_test_masks: boolean to specify if we build multiple test masks in the outer loop.
+            serialize: boolean to specify whether to organize the list of ids in temporal sequences for RNN inputs
 
         Example:
             {0: {'train': [..], 'test': [..]}, 1:{'train': [..], 'test': [..]}, ..., k:{'train': [..], 'test': [..]}}
@@ -253,11 +253,10 @@ class KFoldsSampler:
 
                 # Get the corresponding indexes in the dataset of the selected ids according to the sampling strategy
                 masks[i] = self.sample_idx_with_strategy(multiple_test_masks,
-                                                         sampling_strategy,
-                                                         cumulate_samples,
-                                                         temporal_sampling,
                                                          map_ids,
-                                                         (train_ids, valid_ids, test_ids), )
+                                                         (train_ids, valid_ids, test_ids),
+                                                         sampling_strategy,
+                                                         serialize)
                 masks[i][MaskType.INNER] = {}
                 bar.update()
 
@@ -280,14 +279,13 @@ class KFoldsSampler:
 
                         # Get the corresponding indexes in the dataset of the selected ids according to the sampling
                         # strategy
-                        masks[i][MaskType.INNER][j] = self.sample_idx_with_strategy(multiple_test_masks,
-                                                                                    sampling_strategy,
-                                                                                    cumulate_samples,
-                                                                                    temporal_sampling,
+                        masks[i][MaskType.INNER][j] = self.sample_idx_with_strategy(False,
                                                                                     map_ids,
                                                                                     (inner_train_ids,
                                                                                      inner_valid_ids,
                                                                                      inner_test_ids),
+                                                                                    sampling_strategy,
+                                                                                    serialize
                                                                                     )
                         bar.update()
 
@@ -295,143 +293,161 @@ class KFoldsSampler:
 
     @staticmethod
     def sample_idx_with_strategy(multiple_test_masks: bool,
-                                 sampling_strategy: int,
-                                 cumulate_samples: bool,
-                                 temporal_sampling: bool,
                                  map_idx: Dict[int, Dict[int, int]],
-                                 ids_masks: Tuple[List[int], Union[List[int], None], List[int]]):
+                                 ids_masks: Tuple[List[int], Union[List[int], None], List[int]],
+                                 sampling_strategy: int = None,
+                                 serialize: bool = False):
+        """
+        Returns lists of indexes to use as train, valid and test masks for one single split, following
+        a sampling strategy
+
+        Args:
+            multiple_test_masks: boolean to specify if we build multiple test masks.
+            map_idx: dictionary mapping each patient id to the corresponding visit occurrences and their indexes.
+                        Example: {'patient_1':{'visit_1':index_i, .. ,'visit_k':index_j}}
+            ids_masks: tuple with patient ids belonging to the training, validation and testing sets, respectively.
+            sampling_strategy: samples to consider in the training and validation sets
+                            - if i > 0, the ith id's occurrence to consider (ith patient's visit)
+                            - if -1 consider the last occurrence (visit).
+                            - if None, consider all patient's visits' independently
+            serialize: boolean to specify whether to organize the list of ids in temporal sequences for RNN inputs
+
+        """
         idx_masks = {MaskType.TRAIN: [],
                      MaskType.VALID: [],
                      MaskType.TEST: []}
-        MAX_LEN = [len(i) for i in map_idx.values()]
-        maximum = max(MAX_LEN) if sampling_strategy == -1 else sampling_strategy
+
+        temporal_sampling = True if sampling_strategy is not None else False
+        max_len = [len(i) for i in map_idx.values()]
+        maximum = max(max_len) if ((sampling_strategy == -1) | (sampling_strategy is None)) else sampling_strategy
 
         for ids, mask_type in zip(ids_masks, idx_masks.keys()):
             if ids is not None:
-                if sampling_strategy != 0:
-                    if not temporal_sampling:
-                        # Get the corresponding visits for each set: train, valid, set
-                        idx_masks[mask_type] += [map_idx[_id][min(max(map_idx[_id].keys()), maximum)] for _id in ids]
+                # If we consider patients visits independently
+                if not temporal_sampling:
+                    # Get the last visits for each set: train, valid, set
+                    idx_masks[mask_type] += [map_idx[_id][max(map_idx[_id].keys())] for _id in ids]
 
-                        if cumulate_samples & (mask_type != MaskType.TEST):
-                            # Add all the visits before the ith visit of the sampling strategy in train and valid sets
-                            for k in range(1, maximum):
-                                # We make sure the kth visit is not the last one otherwise we would have included it above
-                                idx_masks[mask_type] += [map_idx[_id][k] for _id in ids
-                                                         if
-                                                         ((k in map_idx[_id].keys()) & (k < max(map_idx[_id].keys())))]
+                    if mask_type != MaskType.TEST:
+                        # Add all the visits before the last visit in train and valid sets
+                        idx_masks[mask_type] += [map_idx[_id][k] for _id in ids
+                                                 for k in map_idx[_id].keys()
+                                                 if k < max(map_idx[_id].keys())]
                     else:
+                        # Select one random per patient in the testing set
+                        idx_masks[MaskType.TEST + '_random_visit'] = [
+                            map_idx[_id][np.random.choice(list(map_idx[_id].keys()))]
+                            for _id in ids
+                        ]
+
+                # If we build sequences of visits for each patient (temporal analysis)
+                else:
+                    # Get the sequences of visits for train and valid sets according to the sampling strategy
+                    if mask_type != MaskType.TEST:
                         idx_masks[mask_type] = [KFoldsSampler.extract_occurrences_idx(maximum, map_idx[_id])
                                                 for _id in ids]
-
-                    if (mask_type == MaskType.TEST) & multiple_test_masks:
-                        for i in range(1, constants.MAX_VISIT + 1):
-                            # Get the testing set where each observation is at most the ith visit
-                            # ignore the sets where i == strategy because it represents the test set
-                            if i != sampling_strategy:
-                                if not temporal_sampling:
-                                    idx_masks[mask_type + f"_{i}th_visit"] = [
-                                        map_idx[_id][min(max(map_idx[_id].keys()), i)]
-                                        for _id in ids]
-                                else:
-                                    idx_masks[mask_type + f"_{i}th_visit"] = [
-                                        KFoldsSampler.extract_occurrences_idx(i, map_idx[_id])
-                                        for _id in ids]
-
-                        # Get the testing set with all last visits
-                        if sampling_strategy != -1:
-                            if not temporal_sampling:
-                                idx_masks[mask_type + '_last_visits'] = [map_idx[_id][max(map_idx[_id].keys())] for _id
-                                                                         in
-                                                                         ids]
-                            else:
-                                idx_masks[mask_type + '_last_visits'] = [
-                                    KFoldsSampler.extract_occurrences_idx(max(MAX_LEN),
-                                                                          map_idx[_id])
-                                    for _id in ids]
-                else:
-                    # Get all the occurrences of each id
-                    idx_masks[mask_type] += [KFoldsSampler.extract_occurrences_idx(max(MAX_LEN), map_idx[_id])
-                                             for _id in ids]
-                    # Flatten the list
-                    idx_masks[mask_type] = [index for indexes in idx_masks[mask_type] for index in indexes]
-
-        return idx_masks
-
-    @staticmethod
-    def sample_last_idx_with_strategy(multiple_test_masks: bool,
-                                      sampling_strategy: int,
-                                      cumulate_samples: bool,
-                                      temporal_sampling: bool,
-                                      map_idx: Dict[int, Dict[int, int]],
-                                      ids_masks: Tuple[List[int], Union[List[int], None], List[int]]):
-        idx_masks = {MaskType.TRAIN: [],
-                     MaskType.VALID: [],
-                     MaskType.TEST: []}
-        MAX_LEN = [len(i) for i in map_idx.values()]
-        maximum = max(MAX_LEN)  # if sampling_strategy == -1 else sampling_strategy
-
-        for ids, mask_type in zip(ids_masks, idx_masks.keys()):
-            if ids is not None:
-                if sampling_strategy != 0:
-                    if not temporal_sampling:
-                        # Get the last visit for each set: train, valid, set
-                        idx_masks[mask_type] += [map_idx[_id][min(max(map_idx[_id].keys()), maximum)] for _id in ids]
-
-                        if cumulate_samples & (mask_type != MaskType.TEST):
-                            # Add k visits before the last visit where k = sampling_strategy
-                            for k in range(1, sampling_strategy):
-                                idx_masks[mask_type] += [map_idx[_id][max(map_idx[_id].keys()) - k] for _id in ids
-                                                         if max(map_idx[_id].keys()) - k > 0]
                     else:
+                        # Get the visit sequence up to the last visit for each patient in the testing set
                         idx_masks[mask_type] = [
-                            KFoldsSampler.extract_occurrences_idx(sampling_strategy, map_idx[_id], True)
+                            KFoldsSampler.extract_occurrences_idx(len(map_idx[_id].keys()), map_idx[_id])
+                            for _id in ids]
+                        # Get the visit sequence up to a randomly selected visit for each patient in the testing set
+                        idx_masks[mask_type + '_random_visit'] = [
+                            KFoldsSampler.extract_occurrences_idx(
+                                np.random.choice(np.arange(1, len(map_idx[_id].keys()) + 1)), map_idx[_id])
                             for _id in ids]
 
-                    if (mask_type == MaskType.TEST) & multiple_test_masks:
-                        for i in range(1, constants.MAX_VISIT + 1):
-                            # Get the testing set where each observation is at most the ith visit
-                            # ignore the sets where i == strategy because it represents the test set
-                            if i != sampling_strategy:
-                                if not temporal_sampling:
-                                    pass
-                                else:
-                                    idx_masks[mask_type + f"_{i}th_visit"] = [
-                                        KFoldsSampler.extract_occurrences_idx(i, map_idx[_id], True)
-                                        for _id in ids]
+                # Create masks for each group of patients
+                if (mask_type == MaskType.TEST) & multiple_test_masks:
+                    # Get all the visits of patients with exactly i visits or with at least i visits
+                    for i in range(1, constants.MAX_VISIT + 1):
+                        section_exact = mask_type + f"_exact_{i}_visits"
+                        section_at_least = mask_type + f"_with_{i}_visits"
+                        if not temporal_sampling:
+                            idx_masks[section_exact] = [map_idx[_id][max(map_idx[_id].keys())]
+                                                        for _id in ids
+                                                        if len(map_idx[_id].keys()) == i]
 
-                        # Get the testing set with all visits
-                        if sampling_strategy != -1:
-                            if not temporal_sampling:
-                                pass
-                            else:
-                                idx_masks[mask_type + '_last_visits'] = [
-                                    KFoldsSampler.extract_occurrences_idx(max(MAX_LEN),
-                                                                          map_idx[_id], True)
-                                    for _id in ids]
-                else:
-                    # Get all the occurrences of each id
-                    idx_masks[mask_type] += [KFoldsSampler.extract_occurrences_idx(max(MAX_LEN), map_idx[_id])
-                                             for _id in ids]
-                    # Flatten the list
-                    idx_masks[mask_type] = [index for indexes in idx_masks[mask_type] for index in indexes]
+                            idx_masks[section_at_least] = [map_idx[_id][sorted(map_idx[_id].keys())[i - 1]]
+                                                           for _id in ids
+                                                           if len(map_idx[_id].keys()) >= i]
 
-        return idx_masks
+                        else:
+                            idx_masks[section_exact] = [
+                                KFoldsSampler.extract_occurrences_idx(i, map_idx[_id])
+                                for _id in ids
+                                if len(map_idx[_id].keys()) == i]
+                            idx_masks[section_at_least] = [
+                                KFoldsSampler.extract_occurrences_idx(i, map_idx[_id])
+                                for _id in ids
+                                if len(map_idx[_id].keys()) >= i]
+
+                    # Get the remaining patients having more than MAX_VISIT visits
+                    if not temporal_sampling:
+                        idx_masks[mask_type + '_other_visit'] = [map_idx[_id][max(map_idx[_id].keys())]
+                                                                 for _id in ids
+                                                                 if len(map_idx[_id].keys()) > constants.MAX_VISIT
+                                                                 ]
+                        idx_masks[mask_type + '_other_random_visit'] = [
+                            map_idx[_id][
+                                sorted(map_idx[_id].keys())[np.random.choice(
+                                    np.arange(constants.MAX_VISIT + 1, len(map_idx[_id].keys()) + 1)) - 1]]
+                            for _id in ids
+                            if len(map_idx[_id].keys()) > constants.MAX_VISIT
+                        ]
+
+
+                    else:
+                        idx_masks[mask_type + '_other_visit'] = [
+                            KFoldsSampler.extract_occurrences_idx(len(map_idx[_id].keys()), map_idx[_id])
+                            for _id in ids
+                            if len(map_idx[_id].keys()) > constants.MAX_VISIT]
+
+                        idx_masks[mask_type + '_other_random_visit'] = [
+                            KFoldsSampler.extract_occurrences_idx(
+                                np.random.choice(np.arange(constants.MAX_VISIT + 1, len(map_idx[_id].keys()) + 1)),
+                                map_idx[_id])
+                            for _id in ids
+                            if len(map_idx[_id].keys()) > constants.MAX_VISIT
+                        ]
+
+        if serialize:
+            return KFoldsSampler.serialize_mask(idx_masks)
+        else:
+            return idx_masks
 
     @staticmethod
     def extract_occurrences_idx(max_occurrence: int,
-                                map_idx: Dict[int, int],
-                                from_last: bool = False) -> List[int]:
+                                map_idx: Dict[int, int]) -> List[int]:
+        """
+        Extract the indexes of all the visits before the max_occurrence visit
+
+        Args:
+            max_occurrence: the maximum number of visits to extract for each patient
+            map_idx: dictionary mapping each patient id to the corresponding visit occurrences and their indexes.
+                        Example: {'patient_1':{'visit_1':index_i, .. ,'visit_k':index_j}}
+
+        """
         # Order the occurrences from the first one to the last
         ordered_occ = dict(sorted(map_idx.items()))
-        if not from_last:
-            # Get the indexes of all the occurrences <= max_occurrence
-            return [ordered_occ[occurrence] for occurrence in ordered_occ.keys() if occurrence <= max_occurrence]
-        else:
-            f = [ordered_occ[max(ordered_occ.keys()) - occurrence] for occurrence in range(max_occurrence)
-                 if max(ordered_occ.keys()) - occurrence > 0]
-            f.reverse()
-            return f
+
+        # Get the indexes of all the occurrences <= max_occurrence
+        return [ordered_occ[occurrence] for nb, occurrence in enumerate(ordered_occ.keys())
+                if nb + 1 <= max_occurrence]
+
+    @staticmethod
+    def serialize_mask(mask: Dict[str, List[int]]) -> dict[str, List[List[int]]]:
+        """
+        Transform the list of indexes to a list of lists of indexes for RNN processing
+
+        Args:
+            mask: indexes belonging to training, validation and other test sets of one single split
+
+        """
+        serialized_mask = {}
+        for key, values in mask.items():
+            serialized_mask[key] = [[value] for value in values]
+        return serialized_mask
 
 
 class BatchSampler(Sampler):
@@ -462,7 +478,7 @@ class BatchSampler(Sampler):
                 zero_x.append((idx[i], p.shape[0]))
             idx_seq_len.append((i, p.shape[0]))  # Map sequence indices to their length
         self.idx_seq_len = idx_seq_len
-        self.batch_list = self._generate_batch_map() # Generate
+        self.batch_list = self._generate_batch_map()  # Generate
         self.num_batches = len(self.batch_list)
 
     def _generate_batch_map(self):
