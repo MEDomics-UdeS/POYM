@@ -200,7 +200,8 @@ class LSTM(TorchCustomModel):
                 output = output[relative_indexes]
 
                 # We calculate the loss and the score
-                # Sample weights are based on the ground truth but no data leakage since not used in training/updating just for visualizing
+                # Sample weights are based on the ground truth but no data leakage since not used
+                # in training/updating just for visualizing
                 epoch_loss += self.loss(sample_weights, output, y).item()
                 y_val = torch.cat((y_val, y))
                 p_val = torch.cat((p_val, output))
