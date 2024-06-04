@@ -144,8 +144,10 @@ class BinaryClassificationMetric(Metric):
 
         if not is_tensor(pred):
             pred, targets = self.convert_to_tensors(pred, targets)
-
-        return round(self.compute_metric(pred, targets, thresh), self.n_digits)
+        try:
+            return round(self.compute_metric(pred, targets, thresh), self.n_digits)
+        except ZeroDivisionError:
+            return -1.
 
     def convert_to_tensors(self,
                            pred: Union[array, tensor],
@@ -618,8 +620,12 @@ class F2Score(BinaryClassificationMetric):
 
         Returns: float
         """
-        return (5 * self.precision(pred, targets, thresh) * self.sensitivity(pred, targets, thresh)) / \
-               (4 * self.precision(pred, targets, thresh) + self.sensitivity(pred, targets, thresh))
+
+        try:
+            return (5 * self.precision(pred, targets, thresh) * self.sensitivity(pred, targets, thresh)) / \
+                   (4 * self.precision(pred, targets, thresh) + self.sensitivity(pred, targets, thresh))
+        except ZeroDivisionError:
+            return 0.
 
 
 class F1Score(BinaryClassificationMetric):
