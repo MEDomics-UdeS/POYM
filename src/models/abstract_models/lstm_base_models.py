@@ -1,6 +1,8 @@
 """
 Filename: lstm_base_models.py
 
+Authors: Hakima Laribi
+
 Description: This file is used to define the LSTM model
 
 """

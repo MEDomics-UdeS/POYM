@@ -1,14 +1,12 @@
 """
 Filename: tuning.py
 
-Authors: Nicolas Raymond
-         Mehdi Mitiche
-         Hakima Laribi
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: This file is used to define the Objective and Tuner classes
              used for hyperparameter tuning
 
-Date of last modification : 2021/10/29
 """
 from os import makedirs
 from os.path import join

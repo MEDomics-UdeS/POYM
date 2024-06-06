@@ -1,6 +1,9 @@
 """
 Filename: metric_scores.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+
 Description: This file is used to define binary classifications metrics
 
 """

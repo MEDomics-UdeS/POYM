@@ -1,3 +1,11 @@
+"""
+Filename: elstm_base_models.py
+
+Authors: Hakima Laribi
+
+Description: This file is used to define the ELSTM model
+
+"""
 from typing import List, Optional
 
 import numpy as np

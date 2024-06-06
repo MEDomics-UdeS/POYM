@@ -1,41 +1,15 @@
 """
+Filename: sanity_check_hps.py
+
+Authors: Hakima Laribi
+         Nicolas Raymond
+
 File used to store hyperparameters used for sanity checks
 """
 
-from src.models.xgboost_ import XGBoostHP
 from src.models.ranger_forest import RangerForestHP
 from src.models.lstm import RNNHP
 from src.utils.hyperparameters import Range
-
-XGBOOST_HPS = {
-    XGBoostHP.ALPHA.name: {
-        Range.MIN: 0,
-        Range.MAX: 5
-    },
-    XGBoostHP.BETA.name: {
-        Range.MIN: 0,
-        Range.MAX: 5
-    },
-    XGBoostHP.LR.name: {
-        Range.MIN: 0.001,
-        Range.MAX: 0.5
-    },
-    XGBoostHP.MAX_DEPTH.name: {
-        Range.MIN: 4,
-        Range.MAX: 12,
-    },
-    XGBoostHP.SUBSAMPLE.name: {
-        Range.VALUE: 1,
-    },
-    XGBoostHP.WEIGHT.name: {
-        Range.MIN: 0.1,
-        Range.MAX: 0.9,
-    },
-    XGBoostHP.N_ESTIMATORS.name: {
-        Range.MIN: 100,
-        Range.MAX: 500
-    }
-}
 
 RNN_HPS = {
     RNNHP.ALPHA.name: {

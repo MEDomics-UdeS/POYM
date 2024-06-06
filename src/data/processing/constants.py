@@ -1,6 +1,8 @@
 """
 Filename: constants.py
 
+Authors: Hakima Laribi
+
 Description: Defines constants related to the dataset
 """
 

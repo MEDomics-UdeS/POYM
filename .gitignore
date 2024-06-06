@@ -8,4 +8,6 @@ csvs/*
 tests/*
 checkpoints/*
 .ipynb_checkpoints/*
+*pycache*
 !.gitkeep
+

@@ -1,6 +1,9 @@
 """
 Filename: sampling.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+
 Description: Defines the classes used to sample the dataset for analyses
 
 """

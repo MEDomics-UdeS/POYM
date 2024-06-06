@@ -1,8 +1,8 @@
 """
 Filename: custom_torch_base.py
 
-Author: Nicolas Raymond
-        Hakima Laribi
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: Defines the abstract class TorchCustomModel from which all custom pytorch models
              implemented for the project must inherit. This class allows to store common

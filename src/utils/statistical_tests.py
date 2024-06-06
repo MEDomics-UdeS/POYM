@@ -1,3 +1,12 @@
+"""
+Filename: statistical_tests.py
+
+Authors: Hakima Laribi
+
+Description: This file defines the method that perform statistical tests to compute the significance
+             of difference between the predictions of two models
+
+"""
 import json
 import os
 from re import search

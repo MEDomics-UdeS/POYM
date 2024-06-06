@@ -1,8 +1,8 @@
 """
 Filename: visualization.py
 
-Authors: Nicolas Raymond
-         Hakima Laribi
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: This file contains all function related to data visualization
 """

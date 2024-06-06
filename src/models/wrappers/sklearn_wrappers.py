@@ -2,8 +2,8 @@
 
 Filename: sklearn_wrappers.py
 
-Author: Nicolas Raymond
-        Hakima Laribi
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: This file is used to define the abstract classes
              used as wrappers for models with the sklearn API

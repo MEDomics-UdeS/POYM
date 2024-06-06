@@ -1,6 +1,9 @@
 """
 Filename: early_stopping.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+
 Description: This file is used to define the EarlyStopper class
 
 """

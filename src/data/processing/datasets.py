@@ -1,6 +1,10 @@
 """
 Filename: datasets.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+
+
 Description: Defines the classes related to datasets
 """
 

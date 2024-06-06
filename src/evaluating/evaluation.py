@@ -1,13 +1,12 @@
 """
 Filename: evaluation.py
 
-Authors: Nicolas Raymond
-         Mehdi Mitiche
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: This file is used to define the Evaluator class in charge
              of comparing models against each other
 
-Date of last modification : 2021/10/29
 """
 import pickle
 import random

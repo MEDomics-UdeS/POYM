@@ -1,7 +1,9 @@
 """
 Filename: ensemble_lstm.py
 
-Description: This file is used to define the classification wrappers for Super Learner
+Authors: Hakima Laribi
+
+Description: This file is used to define the classification wrappers for ElSTM model
 
 """
 

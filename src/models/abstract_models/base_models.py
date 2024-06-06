@@ -1,6 +1,9 @@
 """
 Filename: base_models.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+
 Description: Defines the abstract HOMRBinaryClassifier classes that must be used
              to build every other model in the project.
              It ensures consistency will all hyperparameter tuning functions.

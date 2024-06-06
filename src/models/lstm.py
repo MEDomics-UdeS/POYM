@@ -1,6 +1,8 @@
 """
 Filename: lstm.py
 
+Authors: Hakima Laribi
+
 Description: This file is used to define the classification
              wrappers for LSTM models
 

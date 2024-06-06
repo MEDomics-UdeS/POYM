@@ -1,6 +1,8 @@
 """
 Filename: preparing.py
 
+Authors: Hakima Laribi
+
 Description: Defines the DataPreparer used to prepare the different cohorts of the project
 
 """

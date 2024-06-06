@@ -5,7 +5,6 @@ Author: Nicolas Raymond
 
 Description: Defines all transformations related to preprocessing treatment
 
-Date of last modification : 2021/11/01
 """
 
 from typing import Optional, Tuple, List

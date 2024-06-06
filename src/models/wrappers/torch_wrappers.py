@@ -2,8 +2,8 @@
 
 Filename: torch_wrappers.py
 
-Author: Nicolas Raymond
-        Hakima Laribi
+Authors: Hakima Laribi
+         Nicolas Raymond
 
 Description: This file is used to define the abstract classes
              used as wrappers for custom torch models

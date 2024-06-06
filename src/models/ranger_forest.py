@@ -1,6 +1,8 @@
 """
 Filename: ranger_forest.py
 
+Authors: Hakima Laribi
+
 Description: This file is used to define the classification
              wrappers for the skranger random forest models
 
@@ -16,7 +18,7 @@ from src.utils.hyperparameters import HP, NumericalContinuousHP, NumericalIntHP
 
 class HOMRBinaryRGFC(SklearnBinaryClassifierWrapper):
     """
-    Sklearn random forest classifier wrapper for the HOMR framework
+    Skranger random forest classifier wrapper for the HOMR framework
     """
     def __init__(self,
                  n_estimators: int = 512,

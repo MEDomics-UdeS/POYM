@@ -1,6 +1,9 @@
 """
 Filename: hyperparameters.py
 
+Authors: Hakima Laribi
+         Nicolas Raymond
+         
 Description: This file is used to define classes related to hyperparameters
 
 """
