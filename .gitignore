@@ -7,4 +7,5 @@ records/*
 csvs/*
 tests/*
 checkpoints/*
+.ipynb_checkpoints/*
 !.gitkeep
