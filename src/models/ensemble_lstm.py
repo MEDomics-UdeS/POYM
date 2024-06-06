@@ -18,7 +18,7 @@ from src.models.abstract_models.elstm_base_model import EnsembleLSTMBinaryClassi
 from src.utils.hyperparameters import HP
 
 
-class HOMRBinarySLC(BinaryClassifier):
+class HOMRBinaryELSTMC(BinaryClassifier):
     """
     ELSTM classifier model for the HOMR framework
     """
