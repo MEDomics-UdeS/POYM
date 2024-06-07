@@ -16,8 +16,6 @@ from typing import List
 import numpy as np
 import torch
 
-from src.models.ensemble_lstm import HOMRBinaryELSTMC
-
 os.chdir('../')
 
 
@@ -43,6 +41,7 @@ if __name__ == '__main__':
     from src.utils.metric_scores import *
     from src.evaluating.evaluation import Evaluator
     from src.models.lstm import HOMRBinaryLSTMC
+    from src.models.ensemble_lstm import HOMRBinaryELSTMC
     from settings.paths import Paths
     from hps.sanity_check_hps import RNN_HPS
 
@@ -189,7 +188,7 @@ if __name__ == '__main__':
         def update_fixed_params(subset, itr):
             fixed_hps = {'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                          'cat_idx': [],
-                         'cat_sizes': []}
+                         'cat_sizes': [],}
             # Load the pretrained models
             lstm_model = HOMRBinaryLSTMC(**fixed_hps)
             pretrained_models = []
@@ -198,7 +197,7 @@ if __name__ == '__main__':
                     k = 'last'
                 model_path = os.path.join(Paths.EXPERIMENTS_RECORDS,
                                           f"Holdout_LSTM_{k}_visits_{exp_suffix}",
-                                          f"Split_{itr}/torch_model.pt")
+                                          f"Split_0/torch_model.pt")
                 lstm_model._model = torch.load(model_path)
                 pretrained_models += [deepcopy(lstm_model)]
 
