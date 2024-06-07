@@ -10,6 +10,8 @@ import numpy as np
 import pandas as pd
 import json
 
+from sklearn.model_selection import train_test_split
+
 from src.data.processing import constants
 
 
@@ -22,22 +24,44 @@ class DataPreparer:
 
     def __init__(self,
                  train_file: str = "csvs/df_train.csv",
-                 test_fie: str = None,
+                 test_file: str = None,
                  task: str = constants.OYM,
+                 split_train_test: int = None
                  ):
         """
         Saves private attributes
 
         Args:
             train_file : path to the csv of the training cohort with visits between 01-07-2011 and 30-06-2017
-            test_fie : path to the csv of the testing cohort with visits between 01-07-2017 and 30-06-2021
+            test_file : path to the csv of the testing cohort with visits between 01-07-2017 and 30-06-2021
+            task : name of the outcome column
+            split_train_test: if not None, split the train_file to train and test sets with split_train_test elements
+            in the training set
         """
 
         # Internal private fixed attributes
         self.task = task
 
-        self.__training_cohort = pd.read_csv(train_file)
-        self.__testing_cohort = pd.read_csv(test_fie) if test_fie is not None else None
+        if split_train_test is not None and test_file == None:
+            df = pd.read_csv(train_file)
+            # Divide dataset to learning set and holdout set according to admission dates
+            if "admission_date" in df.columns:
+                df['admission_date'] = pd.to_datetime(df['admission_date'])
+                df.sort_values(by='admission_date', inplace=True)
+                self.__training_cohort = df[df['admission_date'] < '2017-07-01']
+                holdout = df[df['admission_date'] >= '2017-07-01']
+                # Remove patients admitted before 2017-07-01 to avoid data leakage between both sets
+                self.__testing_cohort = holdout[~holdout['patient_id'].isin(self.__training_cohort['patient_id'])]
+
+            # Divide dataset to learning set and holdout set randomly
+            else:
+                train_patients, test_patients = train_test_split(df['patient_id'].unique(), train_size=split_train_test)
+                self.__training_cohort = df[df['patient_id'].isin(train_patients)]
+                self.__testing_cohort = df[df['patient_id'].isin(test_patients)]
+
+        else:
+            self.__training_cohort = pd.read_csv(train_file)
+            self.__testing_cohort = pd.read_csv(test_file) if test_file is not None else None
 
         # select the predictors, the visit_id and the patient_id for each cohort and the target column
         self.__training_cohort = self.select_variables(self.__training_cohort)
@@ -59,6 +83,18 @@ class DataPreparer:
                 # change values of the columns : ( gender, living_status, admission_group, service_group)
                 for column in constants.COL_VALUES_RENAMED:
                     self.rename_column_values(df, column)
+
+                # Add the rank of each visit, visits are ordered in the dataset according to their occurrences
+                if "nb_visits" not in df.columns:
+                    df.sort_values(by='patient_id', inplace=True)
+                    pt_groups = df.groupby('patient_id')
+
+                    # Process visits and concatenate DataFrames
+                    rank_visits = []
+                    for _, visits in pt_groups:
+                        rank_visits += list(range(1, len(visits) + 1))
+
+                    df["nb_visits"] = rank_visits
 
     @property
     def get__training_cohort(self):
