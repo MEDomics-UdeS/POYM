@@ -9,5 +9,6 @@ tests/*
 checkpoints/*
 .ipynb_checkpoints/*
 *pycache*
+.idea
 !.gitkeep
 
