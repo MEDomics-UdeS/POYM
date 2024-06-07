@@ -19,7 +19,6 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 from src.data.processing.datasets import HOMRDataset, LightHOMRDataset
 from src.data.processing.sampling import MaskType, BatchSampler
-from src.models.blocks.mlp_blocks import EntityEmbeddingBlock
 from src.evaluating.early_stopping import EarlyStopper
 from src.utils.metric_scores import Metric
 from src.utils.visualization import visualize_epoch_progression
@@ -90,16 +89,6 @@ class TorchCustomModel(Module, ABC):
         # Initialization of a protected method
         self._update_weights = None
 
-        # We set the embedding layers
-        if len(cat_idx) != 0 and cat_sizes is not None:
-            # We check embedding sizes (if nothing provided -> emb_sizes = cat_sizes)
-            cat_emb_sizes = cat_emb_sizes if cat_emb_sizes is not None else cat_sizes
-
-            # We create the embedding layers
-            self._embedding_block = EntityEmbeddingBlock(cat_sizes, cat_emb_sizes, cat_idx)
-
-            # We sum the length of all embeddings
-            self._input_size += self._embedding_block.output_size
 
     @property
     def output_size(self) -> int:
