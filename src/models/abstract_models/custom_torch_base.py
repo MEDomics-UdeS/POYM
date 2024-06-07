@@ -40,7 +40,6 @@ class TorchCustomModel(Module, ABC):
                  num_cont_col: Optional[int] = None,
                  cat_idx: Optional[List[int]] = None,
                  cat_sizes: Optional[List[int]] = None,
-                 cat_emb_sizes: Optional[List[int]] = None,
                  additional_input_args: Optional[List[Any]] = None,
                  verbose: bool = True):
         """
@@ -56,7 +55,6 @@ class TorchCustomModel(Module, ABC):
                           cont idx are assumed to be range(num_cont_col)
             cat_idx: idx of categorical columns in the dataset
             cat_sizes: list of integer representing the size of each categorical column
-            cat_emb_sizes: list of integer representing the size of each categorical embedding
             additional_input_args: list of arguments that must be also considered when validating
                                    input arguments
             verbose: true if we want to print the evaluating progress

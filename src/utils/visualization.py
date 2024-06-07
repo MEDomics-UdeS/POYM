@@ -6,25 +6,27 @@ Authors: Hakima Laribi
 
 Description: This file contains all function related to data visualization
 """
+import json
 import os
 from os.path import join
 from re import search
 from typing import List, Optional, Union, Dict
 
-import numpy as np
-import pandas as pd
 from matplotlib import pyplot as plt
 import matplotlib as mpl
+import numpy as np
 from numpy import array
 from numpy import sum as npsum
+import pandas as pd
+import seaborn as sns
 from sklearn.calibration import calibration_curve
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torch import tensor
-import seaborn as sns
-import json
+
+
 from src.data.processing.sampling import MaskType
-import textwrap
+
 
 # Epochs progression figure name
 EPOCHS_PROGRESSION_FIG: str = "epochs_progression.png"

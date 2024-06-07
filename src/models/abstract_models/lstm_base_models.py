@@ -39,7 +39,6 @@ class LSTM(TorchCustomModel):
                  num_cont_col: Optional[int] = None,
                  cat_idx: Optional[List[int]] = None,
                  cat_sizes: Optional[List[int]] = None,
-                 cat_emb_sizes: Optional[List[int]] = None,
                  bidirectional: bool = True,
                  verbose: bool = False):
 
@@ -58,7 +57,6 @@ class LSTM(TorchCustomModel):
             num_cont_col: number of numerical continuous columns in the dataset
             cat_idx: idx of categorical columns in the dataset
             cat_sizes: list of integer representing the size of each categorical column
-            cat_emb_sizes: list of integer representing the size of each categorical embedding
             verbose: True if we want trace of the evaluating progress
         """
 
@@ -72,7 +70,6 @@ class LSTM(TorchCustomModel):
                          num_cont_col=num_cont_col,
                          cat_idx=cat_idx,
                          cat_sizes=cat_sizes,
-                         cat_emb_sizes=cat_emb_sizes,
                          verbose=verbose)
 
         self.rnn_model = torch.nn.LSTM if model == 'LSTM' else torch.nn.GRU
@@ -267,7 +264,6 @@ class LSTMBinaryClassifier(LSTM):
                  num_cont_col: Optional[int] = None,
                  cat_idx: Optional[List[int]] = None,
                  cat_sizes: Optional[List[int]] = None,
-                 cat_emb_sizes: Optional[List[int]] = None,
                  weight=None,
                  bidirectional: bool = True,
                  verbose: bool = False):
@@ -283,7 +279,6 @@ class LSTMBinaryClassifier(LSTM):
             num_cont_col: number of numerical continuous columns
             cat_idx: idx of categorical columns in the dataset
             cat_sizes: list of integer representing the size of each categorical column
-            cat_emb_sizes: list of integer representing the size of each categorical embedding
             verbose: true to print evaluating progress when fit is called
         """
         eval_metric = eval_metric if eval_metric is not None else BinaryCrossEntropy()
@@ -299,7 +294,6 @@ class LSTMBinaryClassifier(LSTM):
                          num_cont_col=num_cont_col,
                          cat_idx=cat_idx,
                          cat_sizes=cat_sizes,
-                         cat_emb_sizes=cat_emb_sizes,
                          model=model,
                          bidirectional=bidirectional,
                          verbose=verbose)

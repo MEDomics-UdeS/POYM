@@ -136,8 +136,7 @@ if __name__ == '__main__':
                      'patience': 10,
                      'num_cont_col': len(dataset.cont_cols) + len(dataset.cat_cols),
                      'cat_idx': [],
-                     'cat_sizes': [],
-                     'cat_emb_sizes': []}
+                     'cat_sizes': []}
         lstm_model = HOMRBinaryLSTMC(**fixed_hps)
         pretrained_models = []
         for k in range(1, MAX_VISIT + 2):

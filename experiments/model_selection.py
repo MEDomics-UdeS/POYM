@@ -80,8 +80,7 @@ if __name__ == '__main__':
                     'patience': 10,
                     'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                     'cat_idx': [],
-                    'cat_sizes': [],
-                    'cat_emb_sizes': []}
+                    'cat_sizes': []}
 
 
         print("### Optimization of hyperparameters for LSTM_last ###")
@@ -111,8 +110,7 @@ if __name__ == '__main__':
                    'patience': 10,
                    'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                    'cat_idx': [],
-                   'cat_sizes': [],
-                   'cat_emb_sizes': []}
+                   'cat_sizes': []}
             for hps_name, hps_value in data_file['hyperparameters'].items():
                 hps[hps_name] = hps_value
 
@@ -156,8 +154,7 @@ if __name__ == '__main__':
         def update_fixed_params(subset, itr):
             fixed_hps = {'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                          'cat_idx': [],
-                         'cat_sizes': [],
-                         'cat_emb_sizes': []}
+                         'cat_sizes': []}
             # Load the pretrained models
             lstm_model = HOMRBinaryLSTMC(**fixed_hps)
             pretrained_models = []
@@ -245,8 +242,7 @@ if __name__ == '__main__':
                     'patience': 10,
                     'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                     'cat_idx': [],
-                    'cat_sizes': [],
-                    'cat_emb_sizes': []}
+                    'cat_sizes': []}
 
         """
            Evaluator validation with BLSTM

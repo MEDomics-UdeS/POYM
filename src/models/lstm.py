@@ -36,7 +36,6 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
                  num_cont_col: Optional[int] = None,
                  cat_idx: Optional[List[int]] = None,
                  cat_sizes: Optional[List[int]] = None,
-                 cat_emb_sizes: Optional[List[int]] = None,
                  verbose: bool = True,
                  classification_threshold: float = 0.5,
                  model: str = 'LSTM',
@@ -60,7 +59,6 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
             num_cont_col: number of numerical continuous columns
             cat_idx: idx of categorical columns in the dataset
             cat_sizes: list of integer representing the size of each categorical column
-            cat_emb_sizes: list of integer representing the size of each categorical embedding
             verbose: if True, evaluating progress will be printed
             classification_threshold: threshold used to classify a sample in class 1
             weight: weight attributed to class 1
@@ -74,7 +72,6 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
                                      num_cont_col=num_cont_col,
                                      cat_idx=cat_idx,
                                      cat_sizes=cat_sizes,
-                                     cat_emb_sizes=cat_emb_sizes,
                                      weight=weight,
                                      model=model,
                                      bidirectional=bidirectional,
