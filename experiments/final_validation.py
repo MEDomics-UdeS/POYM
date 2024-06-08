@@ -47,7 +47,8 @@ if __name__ == '__main__':
 
     task = 'oym'
     # Prepare HOMR learning data
-    dp = DataPreparer(task=task, test_fie='csvs/df_holdout.csv')
+    dp = DataPreparer(task=task, train_file='csvs/random_dataset.csv', split_train_test=82104)
+
     df_train = dp.get__training_cohort
     df_test = dp.get__testing_cohort # Use these patients to test the temporal validity of the ELSTM
     # Get the cohort eligible for GOC discussions

@@ -24,15 +24,15 @@ if __name__ == '__main__':
     from src.data.processing.constants import *
     from src.data.processing.sampling import KFoldsSampler
     from src.utils.metric_scores import *
-    from src.utils.statistical_tests import compute_significant_difference
+    from src.utils.utils import compute_significant_difference
     from src.evaluating.evaluation import Evaluator
     from src.models.lstm import HOMRBinaryLSTMC
     from src.models.ensemble_lstm import HOMRBinaryELSTMC
 
     task = 'oym'
     # Prepare HOMR learning data
-    dp = DataPreparer(task=task)
-    df = dp.get__training_cohort
+    dp = DataPreparer(task=task, train_file='csvs/random_dataset.csv', split_train_test=82104)
+    df = dp.get__training_cohort[:5000]
 
     # Initialize random state
     SEED = 101

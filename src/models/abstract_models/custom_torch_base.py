@@ -51,9 +51,9 @@ class TorchCustomModel(Module, ABC):
             eval_metric: evaluation metric of our model (Ex. accuracy, mean absolute error)
             alpha: L1 penalty coefficient
             beta: L2 penalty coefficient
-            num_cont_col: number of numerical continuous columns in the dataset,
+            num_cont_col: number of numerical continuous columns_to_anonymize in the dataset,
                           cont idx are assumed to be range(num_cont_col)
-            cat_idx: idx of categorical columns in the dataset
+            cat_idx: idx of categorical columns_to_anonymize in the dataset
             cat_sizes: list of integer representing the size of each categorical column
             additional_input_args: list of arguments that must be also considered when validating
                                    input arguments
@@ -402,7 +402,7 @@ class TorchCustomModel(Module, ABC):
                 break
 
         if not valid:
-            raise ValueError("There must be continuous columns or categorical columns")
+            raise ValueError("There must be continuous columns_to_anonymize or categorical columns_to_anonymize")
 
     @staticmethod
     def _validate_sample_weights(dataset: HOMRDataset,

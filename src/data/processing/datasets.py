@@ -60,7 +60,7 @@ class HOMRDataset(Dataset):
             cont_cols: list of column names associated with continuous data
             cat_cols: list of column names associated with categorical data
             to_tensor: true if we want the features and targets in tensors, false for numpy arrays
-            norm_col: columns to normalize, if none, normalize all continuous columns
+            norm_col: columns_to_anonymize to normalize, if none, normalize all continuous columns_to_anonymize
             temporal: specifies if the dataset will be used for a temporal analysis
             super_learning: specifies if the dataset will be used for super learning purposes
 
@@ -70,7 +70,7 @@ class HOMRDataset(Dataset):
             raise ValueError("Hospitalisations' ids missing from the dataframe")
 
         if cont_cols is None and cat_cols is None:
-            raise ValueError("At least a list of continuous columns or a list of categorical columns must be provided.")
+            raise ValueError("At least a list of continuous columns_to_anonymize or a list of categorical columns_to_anonymize must be provided.")
 
         if encoding is not None and encoding not in Encodings():
             raise ValueError(f"{encoding} can't be resolved to an encoding type")
@@ -255,7 +255,7 @@ class HOMRDataset(Dataset):
     def _get_categorical_set(self) -> Optional[Union[array, tensor]]:
         """
         Encode the dataset if specified then gets the categorical data of all observations in the original dataset
-        and sets categorical columns idx
+        and sets categorical columns_to_anonymize idx
 
         Returns: array or tensor
                 """
@@ -269,7 +269,7 @@ class HOMRDataset(Dataset):
         col_to_encode = [col for col in self._cat_cols if col not in self._binary_col]
         dataset = self._original_data[col_to_encode]
 
-        # One hot encode all the dataframe and get the new binary columns
+        # One hot encode all the dataframe and get the new binary columns_to_anonymize
         if self._encoding == Encodings.ONE_HOT:
             if len(self._binary_col) < len(self._cat_cols):
                 dataset, cols_encoded = CategoricalTransform.one_hot_encode(dataset)
@@ -280,10 +280,10 @@ class HOMRDataset(Dataset):
             dataset, self._encodings = CategoricalTransform.ordinal_encode(dataset)
             for col in self._binary_col:
                 self._encodings[col] = {0: 0, 1: 1}
-            # Reorder the categorical columns
+            # Reorder the categorical columns_to_anonymize
             self._cat_cols = self._binary_col + col_to_encode
 
-        # Get the categorical dataset with binary and non-binary columns
+        # Get the categorical dataset with binary and non-binary columns_to_anonymize
         dataset = self._original_data[self._binary_col].join(dataset)
 
         # Join the encoded categorical set with the continuous set and save it
@@ -309,7 +309,7 @@ class HOMRDataset(Dataset):
 
     def _get_continuous_set(self) -> Optional[Union[array, tensor]]:
         """
-        Gets the continuous data of all observations in the original dataset and sets continuous columns idx
+        Gets the continuous data of all observations in the original dataset and sets continuous columns_to_anonymize idx
 
         Returns: array or tensor
 
@@ -381,7 +381,7 @@ class HOMRDataset(Dataset):
                          mu: float,
                          std: float) -> Union[tensor, array]:
         """
-        Transform continuous columns with normalization
+        Transform continuous columns_to_anonymize with normalization
 
         Args:
             mu: mean
@@ -416,18 +416,18 @@ class HOMRDataset(Dataset):
         Compute statistics related to the current training set
 
         Args:
-            cat_cols : categorical columns names
-            cont_cols : continuous columns names
+            cat_cols : categorical columns_to_anonymize names
+            cont_cols : continuous columns_to_anonymize names
 
         Returns: modes, means and the standard deviation of each categorical and continuous column
         """
 
         # Input validation
         if cat_cols is not None and not (all(item in self._cat_cols for item in cat_cols)):
-            raise ValueError("Selected categorical columns must exit in the original dataframe")
+            raise ValueError("Selected categorical columns_to_anonymize must exit in the original dataframe")
 
         if cont_cols is not None and not (all(item in self._cont_cols for item in cont_cols)):
-            raise ValueError("Selected continuous columns must exit in the original dataframe")
+            raise ValueError("Selected continuous columns_to_anonymize must exit in the original dataframe")
 
         if self._temporal_analysis & (isinstance(self._train_mask[0], list)):
             train_mask = []
@@ -467,8 +467,8 @@ class HOMRDataset(Dataset):
         Returns a copy of a subset of the original dataframe
 
         Args:
-            cont_cols: list of continuous columns
-            cat_cols: list of categorical columns
+            cont_cols: list of continuous columns_to_anonymize
+            cat_cols: list of categorical columns_to_anonymize
 
         Returns: dataframe
         """
@@ -487,8 +487,8 @@ class HOMRDataset(Dataset):
         Returns a subset of the current dataset using the given cont_cols and cat_cols
 
         Args:
-            cont_cols: list of continuous columns
-            cat_cols: list of categorical columns
+            cont_cols: list of continuous columns_to_anonymize
+            cat_cols: list of categorical columns_to_anonymize
 
         Returns: instance of the PetaleDataset class
         """

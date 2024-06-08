@@ -54,8 +54,8 @@ class LSTM(TorchCustomModel):
             dropout: probability of dropout
             alpha: L1 penalty coefficient
             beta: L2 penalty coefficient
-            num_cont_col: number of numerical continuous columns in the dataset
-            cat_idx: idx of categorical columns in the dataset
+            num_cont_col: number of numerical continuous columns_to_anonymize in the dataset
+            cat_idx: idx of categorical columns_to_anonymize in the dataset
             cat_sizes: list of integer representing the size of each categorical column
             verbose: True if we want trace of the evaluating progress
         """
@@ -276,8 +276,8 @@ class LSTMBinaryClassifier(LSTM):
             dropout: probability of dropout
             alpha: L1 penalty coefficient
             beta: L2 penalty coefficient
-            num_cont_col: number of numerical continuous columns
-            cat_idx: idx of categorical columns in the dataset
+            num_cont_col: number of numerical continuous columns_to_anonymize
+            cat_idx: idx of categorical columns_to_anonymize in the dataset
             cat_sizes: list of integer representing the size of each categorical column
             verbose: true to print evaluating progress when fit is called
         """

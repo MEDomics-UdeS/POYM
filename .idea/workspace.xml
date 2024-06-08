@@ -5,8 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="3e904157-c40b-43f6-a77b-a2d7a59f90da" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/feature_importance.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/feature_importance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/experiments/final_validation.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/final_validation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/experiments/model_selection.py" beforeDir="false" afterPath="$PROJECT_DIR$/experiments/model_selection.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/processing/datasets.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/processing/datasets.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/processing/preparing.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/processing/preparing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/data/processing/transforms.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/data/processing/transforms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/evaluating/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/evaluating/evaluation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/abstract_models/custom_torch_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/abstract_models/custom_torch_base.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/abstract_models/lstm_base_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/abstract_models/lstm_base_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/lstm.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/lstm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/utils/statistical_tests.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +79,7 @@
     "Python.anomyzation_nick.executor": "Run",
     "Python.calib.executor": "Run",
     "Python.display.executor": "Run",
+    "Python.final_validation.executor": "Run",
     "Python.generate_nb_visits.executor": "Run",
     "Python.holdout_LSTM_Ensemble_Learner.executor": "Run",
     "Python.holdout_LSTM_Ensemble_Learner_AdmDemo.executor": "Run",
@@ -78,6 +90,7 @@
     "Python.post_analysis.executor": "Run",
     "Python.pvalues_boot_nick.executor": "Debug",
     "Python.statistical_test.executor": "Run",
+    "Python.utils.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
@@ -107,30 +120,7 @@
       <recent name="$PROJECT_DIR$/feature_importance" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.model_selection">
-    <configuration name="5folds_Ensemble_Learner" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="PTP" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/5folds_Ensemble_Learner.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.utils">
     <configuration name="5folds_Ensemble_Learner_AdmDemo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PTP" />
       <option name="ENV_FILES" value="" />
@@ -154,29 +144,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="5folds_rf_AdmDemo" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="PTP" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/5folds_rf_AdmDemo.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="display" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="PTP" />
       <option name="ENV_FILES" value="" />
@@ -192,6 +159,29 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/utils/display.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="final_validation" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="PTP" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/experiments" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/experiments/final_validation.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -246,13 +236,36 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="utils" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="PTP" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/src/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/src/utils/utils.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.utils" />
+        <item itemvalue="Python.final_validation" />
         <item itemvalue="Python.model_selection" />
         <item itemvalue="Python.display" />
         <item itemvalue="Python.5folds_Ensemble_Learner_AdmDemo" />
-        <item itemvalue="Python.5folds_Ensemble_Learner" />
-        <item itemvalue="Python.5folds_rf_AdmDemo" />
       </list>
     </recent_temporary>
   </component>
@@ -321,7 +334,7 @@
       <workItem from="1712580750149" duration="10752000" />
       <workItem from="1716389199474" duration="2285000" />
       <workItem from="1717156819306" duration="32021000" />
-      <workItem from="1717593129929" duration="30455000" />
+      <workItem from="1717593129929" duration="61454000" />
     </task>
     <servers />
   </component>
@@ -670,6 +683,11 @@
           <line>222</line>
           <option name="timeStamp" value="1051" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/src/utils/utils.py</url>
+          <line>143</line>
+          <option name="timeStamp" value="1077" />
+        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="jupyter-line">
           <url>notebook:///home/local/USHERBROOKE/larh0801/PTP/stats.ipynb</url>
           <line>14</line>
@@ -725,7 +743,7 @@
     <SUITE FILE_PATH="coverage/PTP$test_homr22.coverage" NAME="test_homr22 Coverage Results" MODIFIED="1689623690510" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PTP$5folds_rf_AdmDemo.coverage" NAME="5folds_rf_AdmDemo Coverage Results" MODIFIED="1717167458773" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$5folds_lstm_admdemo_oym.coverage" NAME="5folds_lstm_admdemo_oym Coverage Results" MODIFIED="1702434853431" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/PTP$model_selection.coverage" NAME="model_selection Coverage Results" MODIFIED="1717783153474" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
+    <SUITE FILE_PATH="coverage/PTP$model_selection.coverage" NAME="model_selection Coverage Results" MODIFIED="1717783634941" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$lstm_for_super_learner.coverage" NAME="holdout_LSTM_Ensemble_Learner Coverage Results" MODIFIED="1704157410053" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$lstm_holdout_admdemo.coverage" NAME="lstm_holdout_admdemo Coverage Results" MODIFIED="1695218816486" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$5folds_Ensemble_Learner.coverage" NAME="5folds_Ensemble_Learner Coverage Results" MODIFIED="1717183779142" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
@@ -779,6 +797,7 @@
     <SUITE FILE_PATH="coverage/PTP$temporal_feature_importance2.coverage" NAME="temporal_feature_importance2 Coverage Results" MODIFIED="1698937650905" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$5folds_rf.coverage" NAME="5folds_rf Coverage Results" MODIFIED="1717167452144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$test_nick.coverage" NAME="test_nick Coverage Results" MODIFIED="1694714363585" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/tests" />
+    <SUITE FILE_PATH="coverage/PTP$utils.coverage" NAME="utils Coverage Results" MODIFIED="1717875789273" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src/utils" />
     <SUITE FILE_PATH="coverage/PTP$shap_importance2.coverage" NAME="shap_importance2 Coverage Results" MODIFIED="1698247083312" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$lstm_for_super_learner_ihm.coverage" NAME="lstm_for_super_learner_ihm Coverage Results" MODIFIED="1695834750702" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$calib.coverage" NAME="calib Coverage Results" MODIFIED="1712861333865" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -788,7 +807,7 @@
     <SUITE FILE_PATH="coverage/PTP$5folds_lstm_oym.coverage" NAME="5folds_lstm_oym Coverage Results" MODIFIED="1702434910395" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$test_homr2holdout.coverage" NAME="test_homr2holdout Coverage Results" MODIFIED="1686172127677" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PTP$shap_importance3.coverage" NAME="shap_importance3 Coverage Results" MODIFIED="1695834437126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
-    <SUITE FILE_PATH="coverage/PTP$final_validation.coverage" NAME="final_validation Coverage Results" MODIFIED="1690737487297" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
+    <SUITE FILE_PATH="coverage/PTP$final_validation.coverage" NAME="final_validation Coverage Results" MODIFIED="1717787426749" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$hps_lstm_baseline_ihm.coverage" NAME="hps_lstm_baseline_ihm Coverage Results" MODIFIED="1701562045636" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/experiments" />
     <SUITE FILE_PATH="coverage/PTP$hps_test_rf.coverage" NAME="hps_test_rf Coverage Results" MODIFIED="1687197475772" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/PTP$lstm_tesf.coverage" NAME="lstm_tesf Coverage Results" MODIFIED="1685559364574" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

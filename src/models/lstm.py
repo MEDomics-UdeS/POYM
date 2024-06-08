@@ -56,8 +56,8 @@ class HOMRBinaryLSTMC(TorchBinaryClassifierWrapper):
             valid_batch_size: size of the batches in the valid loader (None = one single batch)
             max_epochs: maximum number of epochs for evaluating
             patience: number of consecutive epochs without improvement
-            num_cont_col: number of numerical continuous columns
-            cat_idx: idx of categorical columns in the dataset
+            num_cont_col: number of numerical continuous columns_to_anonymize
+            cat_idx: idx of categorical columns_to_anonymize in the dataset
             cat_sizes: list of integer representing the size of each categorical column
             verbose: if True, evaluating progress will be printed
             classification_threshold: threshold used to classify a sample in class 1

@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # Filter out the specific FutureWarning based on its category
     warnings.filterwarnings("ignore", category=FutureWarning)
     for task in ['oym']:
-        dp = DataPreparer(task=task, test_fie='csvs/df_holdout.csv')
+        dp = DataPreparer(task=task, train_file='csvs/random_dataset.csv', split_train_test=82104)
 
         # Get training and testing datasets then concatenate them
         df_train = dp.get__training_cohort
@@ -309,7 +309,7 @@ if __name__ == '__main__':
 
                     df.loc[feature, columns] = auc_scores
 
-                # Concatenate the DataFrames along the columns (axis=1) to create the final DataFrame
+                # Concatenate the DataFrames along the columns_to_anonymize (axis=1) to create the final DataFrame
                 result_df = pd.concat([base_df, df], axis=1)
                 result_df.reset_index(inplace=True)
                 result_df.rename(columns={'index': 'Features'}, inplace=True)

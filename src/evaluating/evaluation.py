@@ -381,7 +381,7 @@ class Evaluator:
         random_pred = list(data[TRAIN_RESULTS].values())[0][PREDICTION]
         if "[" not in random_pred:
 
-            # Saving of the number of predictions columns
+            # Saving of the number of predictions columns_to_anonymize
             nb_pred_col = 1
 
             # Creation of the conversion function to extract predictions from strings
@@ -389,7 +389,7 @@ class Evaluator:
                 return [float(x)]
         else:
 
-            # Saving of the number of predictions columns
+            # Saving of the number of predictions columns_to_anonymize
             nb_pred_col = len(random_pred[1:-1].split(','))
 
             # Creation of the conversion function to extract predictions from strings

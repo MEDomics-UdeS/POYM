@@ -55,7 +55,9 @@ class DataPreparer:
 
             # Divide dataset to learning set and holdout set randomly
             else:
-                train_patients, test_patients = train_test_split(df['patient_id'].unique(), train_size=split_train_test)
+                train_patients, test_patients = train_test_split(df['patient_id'].unique(),
+                                                                 train_size=split_train_test,
+                                                                 random_state=101)
                 self.__training_cohort = df[df['patient_id'].isin(train_patients)]
                 self.__testing_cohort = df[df['patient_id'].isin(test_patients)]
 
@@ -75,12 +77,12 @@ class DataPreparer:
             # add ID column to the training set
             self.__testing_cohort = self.add_ids(self.__testing_cohort, self.__training_cohort['ids'].max() + 1)
 
-        # Digitize target variable and make sure the categorical columns are in the right format
+        # Digitize target variable and make sure the categorical columns_to_anonymize are in the right format
         for df in [self.__training_cohort, self.__testing_cohort]:
             if df is not None:
                 df[self.task] = np.where(df[self.task], 1, 0)
                 df[constants.CAT_COLS] = df[constants.CAT_COLS].astype('category')
-                # change values of the columns : ( gender, living_status, admission_group, service_group)
+                # change values of the columns_to_anonymize : ( gender, living_status, admission_group, service_group)
                 for column in constants.COL_VALUES_RENAMED:
                     self.rename_column_values(df, column)
 

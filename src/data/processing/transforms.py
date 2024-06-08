@@ -23,7 +23,7 @@ class ContinuousTransform:
                   mean: Optional[pd.Series] = None,
                   std: Optional[pd.Series] = None) -> pd.DataFrame:
         """
-        Applies normalization to columns of a pandas dataframe
+        Applies normalization to columns_to_anonymize of a pandas dataframe
         """
         if mean is not None and std is not None:
             return (df-mean)/std
@@ -37,7 +37,7 @@ class ContinuousTransform:
                     maxima: Optional[int] = None
                     ) -> pd.DataFrame:
         """
-        Applies MaxScaling standardization to columns of a pandas dataframe, values are in [0, interval]
+        Applies MaxScaling standardization to columns_to_anonymize of a pandas dataframe, values are in [0, interval]
         """
         interval = 4
         if minima is not None and maxima is not None:
@@ -58,9 +58,9 @@ class CategoricalTransform:
     @staticmethod
     def one_hot_encode(df: pd.DataFrame) -> Tuple[pd.DataFrame, List[str]]:
         """
-        One hot encodes all columns of the dataframe
+        One hot encodes all columns_to_anonymize of the dataframe
 
-        Returns : the dataframe encoded and its new columns
+        Returns : the dataframe encoded and its new columns_to_anonymize
         """
         df = pd.get_dummies(df)
         return df, list(df.columns)
@@ -69,7 +69,7 @@ class CategoricalTransform:
     def ordinal_encode(df: pd.DataFrame,
                        encodings: Optional[dict] = None) -> Tuple[pd.DataFrame, dict]:
         """
-        Applies ordinal encoding to all columns of the dataframe
+        Applies ordinal encoding to all columns_to_anonymize of the dataframe
         """
         if encodings is None:
             encodings = {}
@@ -87,10 +87,10 @@ class CategoricalTransform:
     @staticmethod
     def to_tensor(df: pd.DataFrame) -> tensor:
         """
-        Takes a dataframe with categorical columns and returns a tensor with "longs"
+        Takes a dataframe with categorical columns_to_anonymize and returns a tensor with "longs"
 
         Args:
-            df: dataframe with categorical columns only
+            df: dataframe with categorical columns_to_anonymize only
 
         Returns: tensor
         """
