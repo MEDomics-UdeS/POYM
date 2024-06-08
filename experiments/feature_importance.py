@@ -313,4 +313,4 @@ if __name__ == '__main__':
                 result_df = pd.concat([base_df, df], axis=1)
                 result_df.reset_index(inplace=True)
                 result_df.rename(columns={'index': 'Features'}, inplace=True)
-                result_df.to_csv(f'feature_importance/global_fi_Bootstraps_CDSS_{task}_{submask}.csv')
+                result_df.to_csv(f'feature_importance/feature_importance_{task}_{submask}.csv')

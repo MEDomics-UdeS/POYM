@@ -114,20 +114,23 @@ class DataPreparer:
             as done in : 10.1093/jamia/ocab140
         """
         df = self.__testing_cohort if df is None else df
-        if not (
+        if (
                 all(item in df.columns for item in
-                    ["service_group", "admission_group", "discharge_date", "admission_date"])):
-            raise Exception(
-                "Dataframe must contain service_group, admission_group, discharge_date and admission_date column")
+                    ["discharge_date", "admission_date"])):
 
-        return df[(df['service_group'] != "Palliative care") &
-                  (df['service_group'] != "Obstetrics") &
-                  (df['admission_group'] != "Obstetrics") &
-                  (((pd.to_datetime(df['discharge_date'], format='%Y-%m-%d')
-                     -
-                     pd.to_datetime(df['admission_date'], format='%Y-%m-%d')).dt.days)
-                   > 0)
-                  ]
+            return df[(df['service_group'] != "Palliative care") &
+                      (df['service_group'] != "Obstetrics") &
+                      (df['admission_group'] != "Obstetrics") &
+                      (((pd.to_datetime(df['discharge_date'], format='%Y-%m-%d')
+                         -
+                         pd.to_datetime(df['admission_date'], format='%Y-%m-%d')).dt.days)
+                       > 0)
+                      ]
+        else:
+            return df[(df['service_group'] != "Palliative care") &
+                      (df['service_group'] != "Obstetrics") &
+                      (df['admission_group'] != "Obstetrics")
+                      ]
 
     def get_cdss_eligible_idx(self, df: pd.DataFrame) -> np.array:
         """
