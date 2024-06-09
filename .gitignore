@@ -11,5 +11,4 @@ checkpoints/*
 *pycache*
 .idea
 !.gitkeep
-!csvs/random_dataset.csv
 
