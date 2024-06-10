@@ -196,6 +196,8 @@ if __name__ == '__main__':
             for k in range(1, MAX_VISIT + 2):
                 if k > MAX_VISIT:
                     k = 'last'
+                # To use our pretrained models, replace the path below with:
+                # f"final_models/LSTM_{k}_visits_{exp_suffix}.pt"
                 model_path = os.path.join(Paths.EXPERIMENTS_RECORDS,
                                           f"Holdout_LSTM_{k}_visits_{exp_suffix}",
                                           f"Split_0/torch_model.pt")
