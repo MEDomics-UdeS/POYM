@@ -18,13 +18,14 @@ Below, we present the mean AUROC and the standard deviation of the ELSTM model f
 |Any visit     | 87.4 +- 0.2 | 88.0 +- 0.3 | 90.6 +- 0.1 | 90.7 +- 0.2 |
 
 
-We encourage the use of the synthetic data to further research in this area. If you require access to the original dataset, please contact [Martin Vallières](martin.vallieres@usherbrooke.ca) to initiate a Data Sharing Agreement.
+We encourage the use of the synthetic data to further research in this area. If you require access to the original dataset, please contact the corresponding author Martin Vallières (martin.vallieres@usherbrooke.ca) to initiate a Data Sharing Agreement.
 ## 2. How to use the package?
 First, install the requirements under **Python 3.10.9** as following:
 ```
 $ pip install -r requirements.txt
 ```
 Move the dowloaded dataset to [csvs](csvs).
+
 To perform model comparaisons experiments, run:
 ```
 $ python experiments/model_selection.py
@@ -39,7 +40,12 @@ $ python experiments/feature_importance.py
 ```
 ## Project Tree
 ```
+├── checkpoints                  <- Temporary state dictionaries save by the EarlyStopper module
 ├── csvs                         <- CSV files of the dataset used in the study
+├── experiments                  <- Scripts to replicate our experiments
+├── feature_importance           <- Directory to store the models performances for each group of patients after permutations
+├── figures                      <- Figures generated in the visualization script
+├── final_models                 <- Pretrained LSTMs with the entire learning set (see Section 4.2)
 ├── hps                          <- Python file to store the range of hyperparameters values
 ├── settings                     <- Files for project setup
 ├── src                          <- All project modules
@@ -55,11 +61,8 @@ $ python experiments/feature_importance.py
 │   │   └── evaluating.py         <- Skeleton of each experiment process
 │   │   └── tuning.py             <- Hyper-parameters optimizations 
 │   └── utils                     
-│   │   └── delong.py             <- Fast implementation of DeLong test
 │   │   └── hyperparameters.py    <- Defines hyperparameters types
 │   │   └── metric_scores.py      <- Custom metrics implementations and wrappers
+│   │   └── utils.py              <- Functions associated to statistical tests and dataset anonymization
 │   │   └── visualization.py      <- Functions to visualize different steps of the experiment
-├── model_selection.py            <- Main script to perform model comparaison
-├── final_validation.py           <- Main script to perform the final validation of LSTM model
-├── feature_importance.py         <- Main script to measure feature importance on the final LSTM model
 └── README.md
