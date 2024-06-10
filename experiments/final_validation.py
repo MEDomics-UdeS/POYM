@@ -179,7 +179,7 @@ if __name__ == '__main__':
         # Split the dataset
         sampler = OneShotSampler(dataset=dataset, n_inner=0, valid_size=0.1)
         masks = sampler(learning_ids=np.array(df_train[IDS].unique()),
-                        test_ids=masks_for_bootstrapping(100, df_test[IDS].unique()),
+                        test_ids=masks_for_bootstrapping(n_bootstraps, df_test[IDS].unique()),
                         sampling_strategy=-1,
                         multiple_test_masks=False,
                         serialize=False)
