@@ -18,7 +18,7 @@ Below, we present the mean AUROC and the standard deviation of the ELSTM model f
 |Any visit     | 87.4 +- 0.2 | 88.0 +- 0.3 | 90.6 +- 0.1 | 90.7 +- 0.2 |
 
 
-We encourage the use of the synthetic data to further research in this area. If you require access to the original dataset, please contact the corresponding author Martin Vallières (martin.vallieres@usherbrooke.ca) to initiate a Data Sharing Agreement.
+We encourage the use of the synthetic data to further research in this area. If you require access to the original dataset, please contact the corresponding author of the paper to initiate a Data Sharing Agreement.
 ## 2. How to use the package?
 First, install the requirements under **Python 3.10.9** as following:
 ```
