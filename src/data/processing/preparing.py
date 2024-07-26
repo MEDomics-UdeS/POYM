@@ -32,8 +32,8 @@ class DataPreparer:
         Saves private attributes
 
         Args:
-            train_file : path to the csv of the training cohort with visits between 01-07-2011 and 30-06-2017
-            test_file : path to the csv of the testing cohort with visits between 01-07-2017 and 30-06-2021
+            train_file : path to the csv of the learning cohort 
+            test_file : path to the csv of the final testing cohort 
             task : name of the outcome column
             split_train_test: if not None, split the train_file to train and test sets with split_train_test elements
             in the training set
