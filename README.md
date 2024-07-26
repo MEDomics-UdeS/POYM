@@ -1,14 +1,11 @@
 ## POYM : Prediction of One-Year Mortality risk 
-This repository stores the code implemented to generate the results of the paper: *Leveraging patients’ longitudinal data to improve the Hospital One-year Mortality Risk*.
-It utilizes data from patients admitted at The University Hospital of Sherbrooke, Canada, between July 1, 2011, and June 30, 2021, to predict their one-year mortality risk. **Please note that the hospitalization data used in this paper cannot be publicly shared due to regulations safeguarding patient privacy.**
+This repository stores the code implemented to generate the results of the paper: *Leveraging patients’ longitudinal data to improve the Hospital One-year Mortality Risk* available as a preprint in medrXiv in: [https://doi.org/10.1101/2024.06.21.24309191](https://doi.org/10.1101/2024.06.21.24309191).
+It utilizes data from patients admitted at The University Hospital of Sherbrooke, Canada, between July 1, 2011, and June 30, 2021, to predict their one-year mortality risk.
 
 ## 1. Data Availability
-To test the code implemented in this work, we have created two alternative datasets:
-
-1. **Random Dataset**: Each patient in the dataset is matched to a randomly generated patient using a categorical distribution on each predictor. This random dataset is publicly available [here](https://drive.google.com/file/d/1VjzDgbkeob50ZV1RSuzrmWG63VI4yWjM/view?usp=sharing).
-2. **Synthetic Dataset**: Each patient in the dataset is matched to a synthetic patient generated using the [AVATAR method](https://doi.org/10.1038/s41746-023-00771-5). We are currently working on obtaining ethical approval to share this synthetic dataset publicly.
-
-For both datasets, we did not save admission and discharge dates to preserve patient's privacy. Consequently, it is not possible to split the dataset temporally as done with the original dataset (**Section 3.3.2**) or to identify admissions with same-day discharge.
+ **Please note that the hospitalization data used in this paper cannot be publicly shared due to regulations safeguarding patient privacy.** However, a synthetic dataset was generated using the [AVATAR method](https://doi.org/10.1038/s41746-023-00771-5) in partnership with [Octopize](https://www.octopize.io/), in which a synthetic patient is created for each patient from the original dataset. This synthetic dataset is publicly available on : [10.5281/zenodo.12954672](https://zenodo.org/doi/10.5281/zenodo.12954672). 
+ 
+ To preserve patient's privacy, we did not save admission and discharge dates. Consequently, it is not possible to split the dataset temporally as done with the original dataset (**Section 3.3.2**) or to identify admissions with same-day discharge.
 
 Below, we present the mean AUROC and the standard deviation of the ELSTM model from a 5-fold cross-validation over the entire dataset, comparing results obtained from the original data versus the synthetic dataset.
 
@@ -24,7 +21,7 @@ First, install the requirements under **Python 3.10.9** as following:
 ```
 $ pip install -r requirements.txt
 ```
-Move the dowloaded dataset to [csvs](csvs).
+Download the synthetic dataset from [10.5281/zenodo.12954672](https://zenodo.org/doi/10.5281/zenodo.12954672) and move it to [csvs](csvs).
 
 To perform model comparaisons experiments, run:
 ```
