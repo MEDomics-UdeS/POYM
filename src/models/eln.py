@@ -1,9 +1,9 @@
 """
-Filename: ensemble_lstm.py
+Filename: eln.py
 
 Authors: Hakima Laribi
 
-Description: This file is used to define the classification wrappers for ElSTM model
+Description: This file is used to define the classification wrappers for ELN model
 
 """
 
@@ -16,21 +16,21 @@ from torch import tensor
 
 from src.data.processing.datasets import HOMRDataset
 from src.models.abstract_models.base_models import BinaryClassifier
-from src.models.abstract_models.elstm_base_model import EnsembleLSTMBinaryClassifier
+from src.models.abstract_models.eln_base_model import EnsembleLongitudinalNetworkBinaryClassifier
 from src.utils.hyperparameters import HP
 
 
-class HOMRBinaryELSTMC(BinaryClassifier):
+class HOMRBinaryELNC(BinaryClassifier):
     """
-    ELSTM classifier model for the HOMR framework
+    ELN classifier model for the HOMR framework
     """
 
     def __init__(self,
                  pretrained_models: List[BinaryClassifier],
                  classification_threshold: float = 0.5,
                  weight: float = None):
-        """
-        Creates an ensemble LSTM classifier and sets protected attributes using parent's constructor
+        """f
+        Creates the Ensemble Longitudinal Network classifier and sets protected attributes using parent's constructor
 
         Args:
             pretrained_models: list of all the pretrained models
@@ -38,7 +38,7 @@ class HOMRBinaryELSTMC(BinaryClassifier):
             weight: weight attributed to class 1
         """
         # Model creation
-        self._model = EnsembleLSTMBinaryClassifier(pretrained_models=pretrained_models)
+        self._model = EnsembleLongitudinalNetworkBinaryClassifier(pretrained_models=pretrained_models)
 
         # Call of parent's constructor
         super().__init__(classification_threshold=classification_threshold,

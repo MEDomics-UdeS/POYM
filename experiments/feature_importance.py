@@ -3,7 +3,7 @@ Filename: feature_importance.py
 
 Authors: Hakima Laribi
 
-Description: This file defines the script that computes the feature importance given by the final ELSTM
+Description: This file defines the script that computes the feature importance given by the final ELN
 trained on the whole learning set and tested on the holdout set using AdmDemoDx predictors.
 
 """
@@ -21,10 +21,10 @@ if __name__ == '__main__':
     from src.data.processing.constants import *
     from src.data.processing.sampling import OneShotSampler
     from src.utils.metric_scores import *
-    from src.models.abstract_models.elstm_base_model import EnsembleLSTMBinaryClassifier
+    from src.models.abstract_models.eln_base_model import EnsembleLongitudinalNetworkBinaryClassifier
     import torch
     from src.models.abstract_models.lstm_base_models import LSTMBinaryClassifier
-    from src.models.ensemble_lstm import HOMRBinaryELSTMC
+    from src.models.eln import HOMRBinaryELNC
     from settings.paths import Paths
     from typing import List, Dict
     from copy import deepcopy
@@ -54,9 +54,9 @@ if __name__ == '__main__':
 
     def predict_probas_and_compute_AUC(x_sizes: Dict[int, List[torch.tensor]],
                                        y_sizes: Dict[int, List[torch.tensor]],
-                                       pretrainedmodel: EnsembleLSTMBinaryClassifier):
+                                       pretrainedmodel: EnsembleLongitudinalNetworkBinaryClassifier):
         """
-        Computes a vectorized prediction of the ELSTM in patient's data permuted or not
+        Computes a vectorized prediction of the ELN in patient's data permuted or not
         Args:
             x_sizes: dictionary with patients' data permuted or not, organized by the sequence length for
             vectorized prediction
@@ -151,13 +151,8 @@ if __name__ == '__main__':
 
         dataset.update_masks(train_mask=masks[0]['train'], valid_mask=masks[0]['valid'], test_mask=masks[0]['test'])
 
-        # Load the pre-trained Super Learner model
-        model = HOMRBinaryELSTMC(**fixed_params)
-        ensemble_model_path = os.path.join(Paths.EXPERIMENTS_RECORDS,
-                                           'Holdout_Bootstrapping_Ensemble_LSTMs_AdmDemoDx/Split_0/sklearn_model.sav')
-        model_loaded = pickle.load(open(ensemble_model_path, 'rb'))
-
-        model._model = model_loaded
+        # Instantiate the ELN
+        model = HOMRBinaryELNC(**fixed_params)
 
         # Get all the features
         submasks = [str(lgt) for lgt in range(1, MAX_VISIT+1)] + ['other', 'all']

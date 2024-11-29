@@ -41,7 +41,7 @@ if __name__ == '__main__':
     from src.utils.metric_scores import *
     from src.evaluating.evaluation import Evaluator
     from src.models.lstm import HOMRBinaryLSTMC
-    from src.models.ensemble_lstm import HOMRBinaryELSTMC
+    from src.models.eln import HOMRBinaryELNC
     from settings.paths import Paths
     from hps.sanity_check_hps import RNN_HPS
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     dp = DataPreparer(task=task, train_file='csvs/dataset.csv', split_train_test=82104)
 
     df_train = dp.get__training_cohort
-    df_test = dp.get__testing_cohort # Use these patients to test the temporal validity of the ELSTM
+    df_test = dp.get__testing_cohort # Use these patients to test the temporal validity of the ELN
     # Get the cohort eligible for GOC discussions
     df_test = dp.create_CDSS_eligble_cohort(df_test)
     df = pd.concat([df_train, df_test]).reset_index(drop=True)
@@ -123,7 +123,7 @@ if __name__ == '__main__':
 
         evaluator.evaluate()
 
-        print("### Train each single LSTM constituting the ELSTM with the selected hyperparameters")
+        print("### Train each single LSTM constituting the ELN with the selected hyperparameters")
 
         # Get the selected hyperparameters
         def update_fixed_params(subset, itr):
@@ -172,9 +172,9 @@ if __name__ == '__main__':
 
             evaluator.evaluate()
 
-        # Prediction using the ELSTM
+        # Prediction using the ELN
         n_bootstraps = 100
-        print(f" Prediction with the ELSTM with {n_bootstraps} bootstrap samples ..")
+        print(f" Prediction with the ELN with {n_bootstraps} bootstrap samples ..")
 
         # Split the dataset
         sampler = OneShotSampler(dataset=dataset, n_inner=0, valid_size=0.1)
@@ -185,7 +185,7 @@ if __name__ == '__main__':
                         serialize=False)
 
 
-        # Define the hyperparameters of the ELSTM
+        # Define the hyperparameters of the ELN
         def update_fixed_params(subset, itr):
             fixed_hps = {'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                          'cat_idx': [],
@@ -208,9 +208,9 @@ if __name__ == '__main__':
 
 
         """
-           Evaluator validation with ELSTM
+           Evaluator validation with ELN
         """
-        evaluator = Evaluator(model_constructor=HOMRBinaryELSTMC,
+        evaluator = Evaluator(model_constructor=HOMRBinaryELNC,
                               dataset=dataset,
                               masks=masks,
                               hps=RNN_HPS,
