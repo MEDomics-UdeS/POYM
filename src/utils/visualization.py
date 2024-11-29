@@ -24,9 +24,7 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from torch import tensor
 
-
 from src.data.processing.sampling import MaskType
-
 
 # Epochs progression figure name
 EPOCHS_PROGRESSION_FIG: str = "epochs_progression.png"
@@ -420,7 +418,7 @@ def plot_heatmaps_ELSTM(lstm_aucs: pd.DataFrame,
     plt.savefig(f'{image_label}.svg')
 
 
-def time_feature_importance(dfs: List[pd.DataFrame], figure_name: str):
+def time_feature_importance(dfs: List[pd.DataFrame], figure_name: str, section_type: str = 'exact'):
     """
     Plots the feature importance of each set of predictors (Demographics, admission characteristics,
     comorbidity diagnoses, admission diagnoses) from previous and current visits for each groups of patients
@@ -489,7 +487,7 @@ def time_feature_importance(dfs: List[pd.DataFrame], figure_name: str):
                             single_feature_importance_global[feature][type_diff][nb_visits].append(
                                 single_feature_importance[feature][type_diff] / sumratio * 100)
                 else:
-                    print('iw')
+                    print('Null values for the sum of AUC_base - AUC_shuffled across all features')
 
     mpl.use('TkAgg')
     sns.set(style="whitegrid")  # Set seaborn style to whitegrid
@@ -505,7 +503,10 @@ def time_feature_importance(dfs: List[pd.DataFrame], figure_name: str):
     # Set the font size for the axis labels and tick labels
     ax.tick_params(axis='both', which='major', labelsize=42)
     ax.set_ylabel('% Feature importance', fontsize=42, labelpad=20)
-    pt_visits = ['All'] + [f'$V_{{{i},last}}$' for i in range(1, len(dfs) - 1)] + [f'$V_{{>{len(dfs) - 2},last}}$']
+    all_visits = ['Any visit'] if section_type == 'with' else ['Last visit']
+    visit_type = ',last' if section_type == 'exact' else ''
+    pt_visits = (all_visits + [f'$V_{{{i}{visit_type}}}$' for i in range(1, len(dfs) - 1)] +
+                 [f'$V_{{>{len(dfs) - 2}{visit_type}}}$'])
 
     # Loop through the feature importances and plot curves
     for (group, dict_type), color in zip(feature_importance_global.items(), pastel_palette):
@@ -535,9 +536,137 @@ def time_feature_importance(dfs: List[pd.DataFrame], figure_name: str):
     ax2.get_yaxis().set_visible(False)
     ax2.get_xaxis().set_visible(False)
     # Customize the legend
-    ax2.legend(fontsize=35, loc='upper left', bbox_to_anchor=(0.45, 1.3), framealpha=1.)
+    ax2.legend(fontsize=35, loc='upper left', bbox_to_anchor=(0.45, 1.32), framealpha=1.)
     ax.legend(fontsize=35, loc='upper left', bbox_to_anchor=(0., 1.3), framealpha=None)
+    ticks = ax.get_xticklabels()
+    ticks[0].set_fontsize(36)
+    fig.subplots_adjust(top=0.8)
+    plt.tight_layout()
+    plt.savefig(figure_name)
+    plt.clf()
 
+
+def global_feature_importance(df: pd.DataFrame, figure_name: str):
+    """
+    Plots the variation in model's performance when shuffling each feature, simultaneously from previous and
+    current visits
+
+    Args:
+        df: dataframe containing AUC scores before and after swapping each predictor in the dataset
+        figure_name: label of the resulting image
+    """
+    feature_importance_global = {}
+
+    feature_correspondence = {
+        'age_original': 'Age',
+        'gender': 'Sex',
+        'is_ambulance': 'Ambulance admission',
+        'flu_season': 'Flu season',
+        'is_icu_start_ho': 'ICU admission',
+        'is_urg_readm': 'Urgent 30-d readmission',
+        'has_dx': 'Visible comorbidities',
+        'ho_ambulance_count': 'Ambulance admissions count',
+        'ed_visit_count': 'ED visits count',
+        'total_duration': 'Weeks recently hospitalized',
+        'living_status': 'Living status',
+        'service_group': 'Admission service',
+        'admission_group': 'Admission type',
+    }
+    auc_base = []
+    # Compute importance
+    for i in range(1, 101):
+        feature_importance = {}
+        single_feature_importance = {}
+        if not df.loc[:, f'AUC_BASE_{i}'].isna().any():
+            sumratio = 0
+            auc_base.append(df.loc[:, f'AUC_BASE_{i}'].iloc[0])
+            diff = df.loc[:, f'AUC_BASE_{i}'] - df.loc[:, f'AUC_shuffled_{i}']
+
+            for feature_index in range(df.shape[0]):
+                feature = df.iloc[feature_index].loc['Features']
+                if search("^(adm_.*)", feature):
+                    group_of_features = '147 admission diagnoses'
+                elif search("^(dx_.*)", feature):
+                    group_of_features = '84 comorbidity diagnoses'
+                elif search("^(gender.*)", feature):
+                    group_of_features = 'Sex'
+                elif search("^(living_status.*)", feature):
+                    group_of_features = 'Living status'
+                elif search("^(service_group.*)", feature):
+                    group_of_features = 'Admission service'
+                elif search("^(admission_group.*)", feature):
+                    group_of_features = 'Admission type'
+                else:
+                    group_of_features = feature_correspondence[feature]
+
+                ratio = diff.iloc[feature_index] if diff.iloc[feature_index] > 0 else 0
+                feature_importance[group_of_features] = feature_importance[group_of_features] + ratio if (
+                        group_of_features in feature_importance.keys()) else ratio
+                single_feature_importance[feature] = ratio
+                sumratio += ratio
+
+            for group in feature_importance.keys():
+                if group in feature_importance_global.keys():
+                    feature_importance_global[group].append(auc_base[i - 1] - feature_importance[group])
+                else:
+                    feature_importance_global[group] = [auc_base[i - 1] - feature_importance[group]]
+
+    mpl.use('TkAgg')
+    sns.set(style="whitegrid")  # Set seaborn style to whitegrid
+    # Plot feature importance as curves
+    mpl.rcParams['font.family'] = 'serif'
+    plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+
+    # Loop through the feature importances and plot curves
+    groups = list(feature_correspondence.values())
+    if '147 admission diagnoses' in feature_importance_global.keys():
+        groups += ['147 admission diagnoses'] + ['84 comorbidity diagnoses']
+    else:
+        groups = [x for x in groups if x != 'Visible comorbidities']
+
+    # Compute the mean of AUROC drop
+    means = [np.mean(feature_importance_global[group]) for group in groups]
+    stds = [np.std(feature_importance_global[group]) for group in groups]
+
+    # Ascending order
+    sorted_indices = np.argsort(means)  # Get indices that sort the means
+    groups = [groups[i] for i in sorted_indices]
+    means = [means[i] for i in sorted_indices]
+    stds = [stds[i] for i in sorted_indices]
+
+    # Plot the bar charts of AUROCs
+    y_coords = np.arange(len(groups))
+    plt.figure(figsize=(12, 13))
+    plt.grid(True, linestyle='--', alpha=0.7, linewidth=1.2)
+    plt.barh(y_coords, means, xerr=stds, capsize=3, color='skyblue', edgecolor='black', height=0.7)
+
+    # Compute the mean and standard deviation for auc_base
+    auc_base_mean = np.mean(auc_base)
+    auc_base_std = np.std(auc_base)
+
+    # Plot the base value of AUROC before shuffling any feature
+    plt.vlines(auc_base_mean, ymin=0, ymax=len(groups) - 1, color='red', label='Mean AUC Base',
+               linewidth=2)
+    plt.fill_betweenx(
+        y_coords,
+        [auc_base_mean - auc_base_std] * len(groups),
+        [auc_base_mean + auc_base_std] * len(groups),
+        color='red',
+        alpha=0.2,
+    )
+    plt.text(
+        y=-0.5,
+        x=auc_base_mean - 0.01,
+        s='Base\nvalue',
+        color='red',
+        fontsize=23,
+        ha='left',
+        va='center',
+    )
+    plt.xlabel('AUROC', fontsize=30, labelpad=20)
+    plt.yticks(y_coords, groups, fontsize=22.5, rotation=0, ha='right')
+    plt.xticks(fontsize=24)
+    plt.xlim(np.min(means) - 0.05, auc_base_mean + 0.01)
     plt.tight_layout()
     plt.savefig(figure_name)
     plt.clf()
