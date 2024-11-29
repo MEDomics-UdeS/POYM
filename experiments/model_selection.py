@@ -31,7 +31,7 @@ if __name__ == '__main__':
 
     task = 'oym'
     # Prepare HOMR learning data
-    dp = DataPreparer(task=task, train_file='csvs/random_dataset.csv', split_train_test=82104)
+    dp = DataPreparer(task=task, train_file='csvs/dataset.csv', split_train_test=82104)
     df = dp.get__training_cohort
 
     # Initialize random state

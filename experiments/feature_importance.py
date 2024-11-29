@@ -99,7 +99,7 @@ if __name__ == '__main__':
     # Filter out the specific FutureWarning based on its category
     warnings.filterwarnings("ignore", category=FutureWarning)
     for task in ['oym']:
-        dp = DataPreparer(task=task, train_file='csvs/random_dataset.csv', split_train_test=82104)
+        dp = DataPreparer(task=task, train_file='csvs/dataset.csv', split_train_test=82104)
 
         # Get training and testing datasets then concatenate them
         df_train = dp.get__training_cohort

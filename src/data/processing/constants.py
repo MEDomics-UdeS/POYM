@@ -11,7 +11,7 @@ import re
 import pandas as pd
 
 # Read full dataset
-df = pd.read_csv("csvs/df_train.csv")
+df = pd.read_csv("csvs/dataset.csv")
 
 # Comorbidities diagnostic variables
 DX_COLS = [dx for dx in list(df.columns) if re.compile("^(dx_).+").search(dx)]
