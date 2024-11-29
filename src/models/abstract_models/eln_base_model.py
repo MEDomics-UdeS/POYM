@@ -15,9 +15,10 @@ from src.data.processing.datasets import HOMRDataset
 from src.models.abstract_models.base_models import BinaryClassifier
 
 
-class EnsembleLSTMBinaryClassifier:
+class EnsembleLongitudinalNetworkBinaryClassifier:
     """
-    Class that defines the ELSTM. This Ensemble model combines the predictions of multiple LSTMs to make a prediction
+    Class that defines the ELN. This Ensemble model combines the predictions of multiple temporal models to make
+    a prediction
     """
 
     def __init__(self,
@@ -105,14 +106,14 @@ class EnsembleLSTMBinaryClassifier:
                     x = torch.stack(x)
 
                     # Ensemble prediction
-                    for pretrained_lstm in self._pretrained_models[(bin_size-1):]:
-                        probas = self.predict_from_lstm(x, pretrained_lstm._model)[relative_indexes]
+                    for pretrained_tm in self._pretrained_models[(bin_size-1):]:
+                        probas = self.predict_from_tm(x, pretrained_tm._model)[relative_indexes]
                         x_probas.append(probas)
 
                 else:
                     # Prediction with the last model only
-                    pretrained_lstm = self._pretrained_models[-1]
-                    probas = self.predict_from_lstm(x, pretrained_lstm._model)[relative_indexes]
+                    pretrained_tm = self._pretrained_models[-1]
+                    probas = self.predict_from_tm(x, pretrained_tm._model)[relative_indexes]
                     x_probas.append(probas)
 
                 # Convert to numpy array
@@ -134,15 +135,15 @@ class EnsembleLSTMBinaryClassifier:
         return reorganized_pred
 
     @staticmethod
-    def predict_from_lstm(x,
-                          pretrainedlstm):
+    def predict_from_tm(x,
+                        pretrained_tm):
         # Set model for evaluation
-        pretrainedlstm.eval()
+        pretrained_tm.eval()
 
         # Execute a forward pass and apply a sigmoid
         with torch.no_grad():
             if isinstance(x, list):
-                return torch.cat([torch.sigmoid(pretrainedlstm(x[l].unsqueeze(dim=0))).cpu() for l in range(len(x))],
+                return torch.cat([torch.sigmoid(pretrained_tm(x[l].unsqueeze(dim=0))).cpu() for l in range(len(x))],
                                  dim=0).squeeze()
             else:
-                return torch.sigmoid(pretrainedlstm(x).squeeze()).cpu()
+                return torch.sigmoid(pretrained_tm(x).squeeze()).cpu()

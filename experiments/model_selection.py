@@ -3,7 +3,7 @@ Filename: model_selection.py
 
 Authors: Hakima Laribi
 
-Description: This file defines the script that performs the model selection step, it compares the ELSTM, BLSTM and RF
+Description: This file defines the script that performs the model selection step, it compares the eln, ST-LSTM and RF
              on patients of the learning set
 
 """
@@ -27,7 +27,7 @@ if __name__ == '__main__':
     from src.utils.utils import compute_significant_difference
     from src.evaluating.evaluation import Evaluator
     from src.models.lstm import HOMRBinaryLSTMC
-    from src.models.ensemble_lstm import HOMRBinaryELSTMC
+    from src.models.eln import HOMRBinaryELNC
 
     task = 'oym'
     # Prepare HOMR learning data
@@ -99,7 +99,7 @@ if __name__ == '__main__':
 
         evaluator.evaluate()
 
-        print("### Train each single LSTM constituting the ELSTM with the selected hyperparameters")
+        print("### Train each single LSTM constituting the ELN with the selected hyperparameters")
 
         # Get the selected hyperparameters
         def update_fixed_params(subset, itr):
@@ -143,14 +143,14 @@ if __name__ == '__main__':
 
             evaluator.evaluate()
 
-        # Prediction using the ELSTM
-        print(f" Prediction with the ELSTM ..")
+        # Prediction using the ELN
+        print(f" Prediction with the ELN ..")
 
         # Split the dataset
         sampler = KFoldsSampler(dataset=dataset, valid_size=0.1, k=5, inner_k=0)
         masks = sampler(sampling_strategy=-1, multiple_test_masks=True, serialize=False)
 
-        # Define the hyperparameters of the ELSTM
+        # Define the hyperparameters of the ELN
         def update_fixed_params(subset, itr):
             fixed_hps = {'num_cont_col': len(subset.cont_cols) + len(subset.cat_cols),
                          'cat_idx': [],
@@ -171,9 +171,9 @@ if __name__ == '__main__':
 
 
         """
-           Evaluator validation with ELSTM
+           Evaluator validation with ELN
         """
-        evaluator = Evaluator(model_constructor=HOMRBinaryELSTMC,
+        evaluator = Evaluator(model_constructor=HOMRBinaryELNC,
                               dataset=dataset,
                               masks=masks,
                               hps=RNN_HPS,
@@ -217,7 +217,7 @@ if __name__ == '__main__':
 
         evaluator.evaluate()
 
-        print("### Evaluate using BLSTM ###")
+        print("### Evaluate using ST-LSTM ###")
         print('### Read the dataset ###')
         # Dataset creation
         dataset = HOMRDataset(df,
@@ -245,7 +245,7 @@ if __name__ == '__main__':
                     'cat_sizes': []}
 
         """
-           Evaluator validation with BLSTM
+           Evaluator validation with ST-LSTM
         """
 
         evaluator = Evaluator(model_constructor=HOMRBinaryLSTMC,
@@ -255,7 +255,7 @@ if __name__ == '__main__':
                               n_trials=100,
                               evaluation_metrics=evaluation_metrics,
                               fixed_params_update_function=update_fixed_params,
-                              evaluation_name=f"BLSTM_tuned_{exp_suffix}",
+                              evaluation_name=f"STLSTM_tuned_{exp_suffix}",
                               save_hps_importance=True,
                               save_optimization_history=True,
                               seed=SEED)
@@ -263,17 +263,17 @@ if __name__ == '__main__':
         evaluator.evaluate()
 
         print('Wilcoxon test to measure the difference significance')
-        # ELSTM vs RF
+        # ELN vs RF
         compute_significant_difference(model_1=os.path.join(Paths.EXPERIMENTS_RECORDS, f"Ensemble_LSTMs_{exp_suffix}"),
                                        model_2=os.path.join(Paths.EXPERIMENTS_RECORDS, f"RandomForest_tuned_{exp_suffix}"),
                                        n_splits=5,
                                        saving_dir=os.path.join(Paths.RECORDS,
                                                                'p_values',
-                                                               f"ELSTM_vs_RF_{exp_suffix}"))
-        # ELSTM vs BLSTM
+                                                               f"ELN_vs_RF_{exp_suffix}"))
+        # ELN vs ST-LSTM
         compute_significant_difference(model_1=os.path.join(Paths.EXPERIMENTS_RECORDS, f"Ensemble_LSTMs_{exp_suffix}"),
-                                       model_2=os.path.join(Paths.EXPERIMENTS_RECORDS, f"BLSTM_tuned_{exp_suffix}"),
+                                       model_2=os.path.join(Paths.EXPERIMENTS_RECORDS, f"STLSTM_tuned_{exp_suffix}"),
                                        n_splits=5,
                                        saving_dir=os.path.join(Paths.RECORDS,
                                                                'p_values',
-                                                               f"ELSTM_vs_BLSTM_{exp_suffix}"))
+                                                               f"ELN_vs_STLSTM_{exp_suffix}"))

@@ -1,10 +1,10 @@
 """
-Filename: feature_importance.py
+Filename: global_model_variation.py
 
 Authors: Hakima Laribi
 
-Description: This file defines the script that computes the feature importance given by the final ELN
-trained on the whole learning set and tested on the holdout set using AdmDemoDx predictors.
+Description: This file defines the script that computes the model's performance variation, when shuffling each feature
+simultaneously for current and previous features.
 
 """
 from tqdm import tqdm
@@ -52,6 +52,7 @@ if __name__ == '__main__':
             else:
                 return torch.sigmoid(pretrainedlstm(x).squeeze()).cpu()
 
+
     def predict_probas_and_compute_AUC(x_sizes: Dict[int, List[torch.tensor]],
                                        y_sizes: Dict[int, List[torch.tensor]],
                                        pretrainedmodel: EnsembleLongitudinalNetworkBinaryClassifier):
@@ -96,9 +97,11 @@ if __name__ == '__main__':
         auc = AUC()
         return auc(pred, targets)
 
+
     # Filter out the specific FutureWarning based on its category
     warnings.filterwarnings("ignore", category=FutureWarning)
-    for task in ['oym']:
+    task = 'oym'
+    for test_type in ['last', 'any']:
         dp = DataPreparer(task=task, train_file='csvs/dataset.csv', split_train_test=82104)
 
         # Get training and testing datasets then concatenate them
@@ -149,16 +152,18 @@ if __name__ == '__main__':
 
         fixed_params = {'pretrained_models': pretrained_models}
 
-        dataset.update_masks(train_mask=masks[0]['train'], valid_mask=masks[0]['valid'], test_mask=masks[0]['test'])
+        # Get the corresponding test mask
+        test_mask = masks[0]['test'] if test_type == 'last' else masks[0]['test_random_visit']
+
+        dataset.update_masks(train_mask=masks[0]['train'], valid_mask=masks[0]['valid'], test_mask=test_mask)
 
         # Instantiate the ELN
         model = HOMRBinaryELNC(**fixed_params)
 
         # Get all the features
-        submasks = [str(lgt) for lgt in range(1, MAX_VISIT+1)] + ['other', 'all']
+        submasks = ['all']
         features = dataset.cont_cols + dataset.cat_cols
-        feature_scores_current = {feature: {sbmask: [] for sbmask in submasks} for feature in features}
-        feature_scores_previous = {feature: {sbmask: [] for sbmask in submasks} for feature in features}
+        feature_scores = {feature: {sbmask: [] for sbmask in submasks} for feature in features}
         bootstraps, n = 100, 1
         # Get the testing tensor
         x_test_original, y_test_original, idx_original = dataset[dataset.test_mask]
@@ -197,14 +202,6 @@ if __name__ == '__main__':
                     if submask == 'all':
                         x_sub = x_sizes
                         y_sub = y_sizes
-                    elif submask == 'other':
-                        size = MAX_VISIT
-                        x_sub = {size: x_sizes[size]}
-                        y_sub = {size: y_sizes[size]}
-                    else:
-                        size = int(submask) - 1
-                        x_sub = {size: x_sizes[size]}
-                        y_sub = {size: y_sizes[size]}
 
                     primary_score[submask].append(predict_probas_and_compute_AUC(x_sub, y_sub, model._model))
 
@@ -216,10 +213,8 @@ if __name__ == '__main__':
                 idx_current, _ = dataset.flatten_indexes(idx)
                 idx_previous = [idx for idx in np.arange(x_stacked.shape[0]) if idx not in idx_current]
 
-                # features = features[:4]
                 for n_feature in range(len(features)):
-                    scores_current = {submask: [] for submask in submasks}
-                    scores_previous = {submask: [] for submask in submasks}
+                    scores_shuffled = {submask: [] for submask in submasks}
                     for k in range(n):
                         # Shuffle the dataset
                         xshuffled = deepcopy(x_stacked)
@@ -234,56 +229,33 @@ if __name__ == '__main__':
 
                         # Reshape the dataset for temporal analysis
                         init = 0
-                        shuffled_current_hosp_sizes = {size_: [] for size_ in np.arange(MAX_VISIT+1)}
-                        shuffled_previous_hosp_sizes = {size_: [] for size_ in np.arange(MAX_VISIT+1)}
-                        y_sizes = {size_: [] for size_ in np.arange(MAX_VISIT+1)}
+                        shuffled_hosp_sizes = {size_: [] for size_ in np.arange(MAX_VISIT + 1)}
+                        y_sizes = {size_: [] for size_ in np.arange(MAX_VISIT + 1)}
 
                         for idx_hosp in idx:
                             history_length = len(idx_hosp)
                             # Reassemble patient's history
-                            patient_with_history_current = xshuffled_current[init:init + history_length]
-                            patient_with_history_previous = xshuffled_previous[init:init + history_length]
+                            patient_with_history = xshuffled[init:init + history_length]
                             patient_y = y_stacked[init:init + history_length]
                             init += history_length
 
                             # Store in the right dictionary according to its size
                             size = history_length - 1 if history_length <= MAX_VISIT else MAX_VISIT
-                            shuffled_previous_hosp_sizes[size].append(patient_with_history_previous)
-                            shuffled_current_hosp_sizes[size].append(patient_with_history_current)
+                            shuffled_hosp_sizes[size].append(patient_with_history)
                             y_sizes[size].append(patient_y)
 
-                        # Compute score on the shuffled data
                         for submask in submasks:
                             if submask == 'all':
-                                x_sub_curr = shuffled_current_hosp_sizes
-                                x_sub_prev = shuffled_previous_hosp_sizes
+                                x_sub = shuffled_hosp_sizes
                                 y_sub = y_sizes
-                            elif submask == 'other':
-                                size = MAX_VISIT
-                                x_sub_curr = {size: shuffled_current_hosp_sizes[size]}
-                                x_sub_prev = {size: shuffled_previous_hosp_sizes[size]}
-                                y_sub = {size: y_sizes[size]}
-                            else:
-                                size = int(submask) - 1
-                                x_sub_curr = {size: shuffled_current_hosp_sizes[size]}
-                                x_sub_prev = {size: shuffled_previous_hosp_sizes[size]}
-                                y_sub = {size: y_sizes[size]}
-
-                            scores_current[submask].append(
-                                predict_probas_and_compute_AUC(x_sub_prev, y_sub, model._model))
-                            # Score when the previous is shuffled
-                            scores_previous[submask].append(
-                                predict_probas_and_compute_AUC(x_sub_curr, y_sub, model._model))
+                            scores_shuffled[submask].append(predict_probas_and_compute_AUC(x_sub, y_sub, model._model))
 
                         bar.update()
 
                     for submask in submasks:
-                        feature_scores_current[features[n_feature]][submask].append(np.mean(scores_current[submask]))
-                        feature_scores_previous[features[n_feature]][submask].append(np.mean(scores_previous[submask]))
-                    filepath_current = os.path.join(f"feature_scores_current_{task}")
-                    filepath_previous = os.path.join(f"feature_scores_previous_{task}")
-                    pickle.dump(feature_scores_current, open(filepath_current, "wb"))
-                    pickle.dump(feature_scores_previous, open(filepath_previous, "wb"))
+                        feature_scores[features[n_feature]][submask].append(np.mean(scores_shuffled[submask]))
+                    filepath_aucs = os.path.join(f"vi_feature_scores_shuffled_{task}")
+                    pickle.dump(feature_scores, open(filepath_aucs, "wb"))
 
             for submask in submasks:
 
@@ -292,15 +264,12 @@ if __name__ == '__main__':
                 for i in range(bootstraps):
                     base_df[columns[i]] = primary_score[submask][i]
 
-                columns = [f'AUC_current_{i + 1}' for i in range(bootstraps)] + [f'AUC_previous_{i + 1}' for i in
-                                                                                 range(bootstraps)]
+                columns = [f'AUC_shuffled_{i + 1}' for i in range(bootstraps)]
                 df = pd.DataFrame(columns=columns, index=features)
 
                 for feature in features:
                     #
-                    auc_scores_current = feature_scores_current[feature][submask]
-                    auc_scores_previous = feature_scores_previous[feature][submask]
-                    auc_scores = auc_scores_current + auc_scores_previous
+                    auc_scores = feature_scores[feature][submask]
 
                     df.loc[feature, columns] = auc_scores
 
@@ -308,4 +277,4 @@ if __name__ == '__main__':
                 result_df = pd.concat([base_df, df], axis=1)
                 result_df.reset_index(inplace=True)
                 result_df.rename(columns={'index': 'Features'}, inplace=True)
-                result_df.to_csv(f'feature_importance/feature_importance_{task}_{submask}.csv')
+                result_df.to_csv(f'feature_importance/performance_variation_{task}_{submask}_{test_type}.csv')
