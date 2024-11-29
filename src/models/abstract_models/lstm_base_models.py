@@ -71,8 +71,12 @@ class LSTM(TorchCustomModel):
                          cat_idx=cat_idx,
                          cat_sizes=cat_sizes,
                          verbose=verbose)
-
-        self.rnn_model = torch.nn.LSTM if model == 'LSTM' else torch.nn.GRU
+        if model == 'LSTM':
+            self.rnn_model = torch.nn.LSTM
+        elif model == 'GRU':
+            self.rnn_model = torch.nn.GRU
+        else:
+            self.rnn_model = torch.nn.RNN
         self.rnn_block = self.rnn_model(input_size=self._input_size,
                                         hidden_size=layers[-1],
                                         num_layers=len(layers),
