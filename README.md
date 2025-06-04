@@ -31,7 +31,7 @@ To replicate the final results on eligible end-of-life care patients, run:
 ```
 $ python experiments/final_validation.py
 ```
-To compute feature importance on the final ELSTM model using AdmDemoDx predictors, run:
+To compute feature importance on the final ELN model using AdmDemoDx predictors, run:
 ```
 $ python experiments/feature_importance.py
 ```
