@@ -1,5 +1,6 @@
 ## POYM : Prediction of One-Year Mortality risk 
-This repository stores the code implemented to generate the results of the paper: *Leveraging patients’ longitudinal data to improve the Hospital One-year Mortality Risk* : https://doi.org/10.1007/s13755-024-00332-4 (full-text view-only version: https://rdcu.be/eccmN)
+This repository stores the code implemented to generate the results of the paper: *Leveraging patients’ longitudinal data to improve the Hospital One-year Mortality Risk* : https://doi.org/10.1007/s13755-024-00332-4 (full-text view-only version: https://rdcu.be/eccmN).
+
 It utilizes data from patients admitted at The University Hospital of Sherbrooke, Canada, between July 1, 2011, and June 30, 2021, to predict their one-year mortality risk.
 
 ## 1. Data Availability
